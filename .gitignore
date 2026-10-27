@@ -82,8 +82,11 @@ results/runs/
 results/logs/
 results/metrics/*
 !results/metrics/.gitkeep
+!results/metrics/*.json
+!results/metrics/*.csv
 results/figures/*
 !results/figures/.gitkeep
+!results/figures/*.png
 *.log
 events.out.tfevents.*
 wandb/

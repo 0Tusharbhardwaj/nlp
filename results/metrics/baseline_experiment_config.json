@@ -1,0 +1,28 @@
+{
+  "random_seed": 42,
+  "dataset": "devign",
+  "tfidf_params": {
+    "max_features": 10000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 3,
+    "sublinear_tf": true
+  },
+  "logistic_regression_params": {
+    "penalty": "l2",
+    "C": 1.0,
+    "solver": "lbfgs",
+    "max_iter": 1000,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "linear_svm_params": {
+    "C": 1.0,
+    "loss": "squared_hinge",
+    "max_iter": 2000,
+    "class_weight": "balanced",
+    "random_state": 42
+  }
+}
