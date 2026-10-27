@@ -1,0 +1,227 @@
+{
+  "experiments": {
+    "E1_Human_In_Distribution": {
+      "description": "Train on human-written code (Devign Train), test on held-out human-written code (Devign Test).",
+      "models": {
+        "logistic_regression": {
+          "experiment_id": "E1_Human_In_Distribution",
+          "model_name": "Logistic Regression",
+          "train_samples_count": 4,
+          "test_samples_count": 2,
+          "metrics": {
+            "accuracy": 0.5,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1_score": 0.6667,
+            "false_negative_rate": 0.0,
+            "false_positive_rate": 1.0,
+            "roc_auc": 1.0,
+            "confusion_matrix": {
+              "tn": 0,
+              "fp": 1,
+              "fn": 0,
+              "tp": 1
+            },
+            "sample_counts": {
+              "total": 2,
+              "actual_vulnerable (1)": 1,
+              "actual_safe (0)": 1,
+              "predicted_vulnerable (1)": 2,
+              "predicted_safe (0)": 0
+            }
+          },
+          "false_negative_count": 0,
+          "missed_cwes": {},
+          "false_negative_examples": []
+        },
+        "linear_svm": {
+          "experiment_id": "E1_Human_In_Distribution",
+          "model_name": "Linear SVM",
+          "train_samples_count": 4,
+          "test_samples_count": 2,
+          "metrics": {
+            "accuracy": 0.5,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1_score": 0.6667,
+            "false_negative_rate": 0.0,
+            "false_positive_rate": 1.0,
+            "roc_auc": 1.0,
+            "confusion_matrix": {
+              "tn": 0,
+              "fp": 1,
+              "fn": 0,
+              "tp": 1
+            },
+            "sample_counts": {
+              "total": 2,
+              "actual_vulnerable (1)": 1,
+              "actual_safe (0)": 1,
+              "predicted_vulnerable (1)": 2,
+              "predicted_safe (0)": 0
+            }
+          },
+          "false_negative_count": 0,
+          "missed_cwes": {},
+          "false_negative_examples": []
+        }
+      }
+    },
+    "E2_ZeroShot_AI_Transfer": {
+      "description": "Train on human code (Devign Train), evaluate directly on AI-generated code (LLMVul) without adaptation.",
+      "models": {
+        "logistic_regression": {
+          "experiment_id": "E2_ZeroShot_AI_Transfer",
+          "model_name": "Logistic Regression",
+          "train_samples_count": 4,
+          "test_samples_count": 4,
+          "metrics": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "false_negative_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "roc_auc": 1.0,
+            "confusion_matrix": {
+              "tn": 2,
+              "fp": 0,
+              "fn": 0,
+              "tp": 2
+            },
+            "sample_counts": {
+              "total": 4,
+              "actual_vulnerable (1)": 2,
+              "actual_safe (0)": 2,
+              "predicted_vulnerable (1)": 2,
+              "predicted_safe (0)": 2
+            }
+          },
+          "false_negative_count": 0,
+          "missed_cwes": {},
+          "false_negative_examples": []
+        },
+        "linear_svm": {
+          "experiment_id": "E2_ZeroShot_AI_Transfer",
+          "model_name": "Linear SVM",
+          "train_samples_count": 4,
+          "test_samples_count": 4,
+          "metrics": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "false_negative_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "roc_auc": 1.0,
+            "confusion_matrix": {
+              "tn": 2,
+              "fp": 0,
+              "fn": 0,
+              "tp": 2
+            },
+            "sample_counts": {
+              "total": 4,
+              "actual_vulnerable (1)": 2,
+              "actual_safe (0)": 2,
+              "predicted_vulnerable (1)": 2,
+              "predicted_safe (0)": 2
+            }
+          },
+          "false_negative_count": 0,
+          "missed_cwes": {},
+          "false_negative_examples": []
+        }
+      }
+    },
+    "E3_Joint_Adaptation": {
+      "description": "Train on human code + portion of AI code (Devign Train + AI Train), test on repository-disjoint AI code (AI Test).",
+      "models": {
+        "logistic_regression": {
+          "experiment_id": "E3_Joint_Adaptation",
+          "model_name": "Logistic Regression",
+          "train_samples_count": 5,
+          "test_samples_count": 3,
+          "metrics": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "false_negative_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "roc_auc": 1.0,
+            "confusion_matrix": {
+              "tn": 2,
+              "fp": 0,
+              "fn": 0,
+              "tp": 1
+            },
+            "sample_counts": {
+              "total": 3,
+              "actual_vulnerable (1)": 1,
+              "actual_safe (0)": 2,
+              "predicted_vulnerable (1)": 1,
+              "predicted_safe (0)": 2
+            }
+          },
+          "false_negative_count": 0,
+          "missed_cwes": {},
+          "false_negative_examples": []
+        },
+        "linear_svm": {
+          "experiment_id": "E3_Joint_Adaptation",
+          "model_name": "Linear SVM",
+          "train_samples_count": 5,
+          "test_samples_count": 3,
+          "metrics": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "false_negative_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "roc_auc": 1.0,
+            "confusion_matrix": {
+              "tn": 2,
+              "fp": 0,
+              "fn": 0,
+              "tp": 1
+            },
+            "sample_counts": {
+              "total": 3,
+              "actual_vulnerable (1)": 1,
+              "actual_safe (0)": 2,
+              "predicted_vulnerable (1)": 1,
+              "predicted_safe (0)": 2
+            }
+          },
+          "false_negative_count": 0,
+          "missed_cwes": {},
+          "false_negative_examples": []
+        }
+      }
+    },
+    "E4_AI_Native": {
+      "description": "Train strictly on AI-generated code (AI Train), evaluate on separate AI-code holdout (AI Test).",
+      "models": {
+        "status": "skipped",
+        "reason": "insufficient_class_diversity_in_ai_train"
+      }
+    }
+  },
+  "uncertain_samples_audit": {
+    "total_uncertain_samples": 0,
+    "samples": []
+  },
+  "ai_data_splits_summary": {
+    "ai_train_count": 1,
+    "ai_test_count": 3,
+    "ai_train_repos": [
+      "ai-assisted-iot/network-daemon"
+    ],
+    "ai_test_repos": [
+      "open-assistant/web-handler",
+      "ai-infra/socket-proxy"
+    ]
+  }
+}
