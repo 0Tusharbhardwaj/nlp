@@ -1,0 +1,171 @@
+# ==============================================================================
+# SecureCode AI - Base Configuration
+# Central configuration for datasets, preprocessing, models, and evaluation
+# ==============================================================================
+
+project:
+  name: "SecureCode-AI"
+  description: "Security and Vulnerability Detection for LLM-Generated Code"
+  version: "1.0.0"
+  author: "SecureCode AI Research Team"
+  seed: 42
+
+system:
+  device: "auto"                    # "cuda", "cpu", or "auto"
+  num_workers: 4
+  mixed_precision: true             # fp16 for CUDA acceleration
+  deterministic: true               # Enforce reproducible PyTorch operations
+
+paths:
+  raw_data_dir: "datasets/raw"
+  processed_data_dir: "datasets/processed"
+  external_data_dir: "datasets/external"
+  reports_dir: "datasets/reports"
+  results_dir: "results"
+  checkpoints_dir: "results/checkpoints"
+  models_dir: "results/models"
+  metrics_dir: "results/metrics"
+  figures_dir: "results/figures"
+  logs_dir: "results/logs"
+
+datasets:
+  # Primary in-distribution benchmark (Human-written C/C++ source code)
+  devign:
+    name: "CodeXGLUE-Devign"
+    source_type: "human"
+    language: "c"
+    raw_path: "datasets/raw/devign"
+    processed_path: "datasets/processed/devign"
+    official_splits: ["train", "valid", "test"]
+    split_ratios:
+      train: 0.80
+      valid: 0.10
+      test: 0.10
+    classes:
+      0: "non-vulnerable"
+      1: "vulnerable"
+
+  # AI-generated vulnerability evaluation benchmark
+  llmvul:
+    name: "LLMVul"
+    source_type: "ai_generated"
+    languages: ["c", "c++", "python"]
+    raw_path: "datasets/raw/llmvul"
+    processed_path: "datasets/processed/llmvul"
+    evaluation_role: "external_evaluation"
+
+  # Security benchmark for code generation models
+  secodeplt:
+    name: "SECODEPLT"
+    source_type: "ai_prompt_and_eval"
+    raw_path: "datasets/raw/secodeplt"
+    processed_path: "datasets/processed/secodeplt"
+    evaluation_role: "supplementary_security_analysis"
+
+  # Human vs AI paired code dataset
+  human_vs_ai:
+    name: "HumanVsAICode"
+    source_type: "paired_human_ai"
+    raw_path: "datasets/raw/human_vs_ai"
+    processed_path: "datasets/processed/human_vs_ai"
+    evaluation_role: "cross_distribution_eval"
+
+preprocessing:
+  tokenizer_name: "microsoft/codebert-base"
+  max_sequence_length: 512
+  truncation: true
+  padding: "max_length"
+  deduplication:
+    enabled: true
+    exact_hash: "md5"
+    near_duplicate_method: "minhash"
+    similarity_threshold: 0.85
+  classical_baseline:
+    strip_comments: false          # Safe setting to preserve strings/URLs
+    lowercase: false
+    preserve_keywords: true
+  codebert:
+    preserve_structure: true
+    normalize_whitespace: true
+
+baselines:
+  tfidf:
+    max_features: 10000
+    ngram_range: [1, 2]
+    min_df: 3
+    sublinear_tf: true
+  
+  logistic_regression:
+    penalty: "l2"
+    C: 1.0
+    solver: "lbfgs"
+    max_iter: 1000
+    class_weight: "balanced"
+    random_state: 42
+  
+  linear_svm:
+    C: 1.0
+    loss: "squared_hinge"
+    max_iter: 2000
+    class_weight: "balanced"
+    random_state: 42
+
+codebert:
+  model_name_or_path: "microsoft/codebert-base"
+  num_labels: 2
+  learning_rate: 2.0e-5
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 32
+  gradient_accumulation_steps: 1
+  num_train_epochs: 3
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  evaluation_strategy: "epoch"
+  save_strategy: "epoch"
+  load_best_model_at_end: true
+  metric_for_best_model: "f1"
+  fp16: true
+  dataloader_drop_last: false
+
+experiments:
+  # E1: Human-trained model evaluated on held-out Human code
+  E1_human_in_distribution:
+    train_dataset: "devign.train"
+    val_dataset: "devign.valid"
+    test_dataset: "devign.test"
+  
+  # E2: Human-trained model evaluated on external AI-generated code
+  E2_cross_eval_ai:
+    train_dataset: "devign.train"
+    test_dataset: "llmvul"
+  
+  # E3: Joint Human + AI training evaluated on disjoint AI holdout
+  E3_joint_adaptation:
+    train_dataset: "joint_devign_ai"
+    test_dataset: "disjoint_ai_test"
+  
+  # E4: AI-only training evaluated on AI holdout
+  E4_ai_native:
+    train_dataset: "ai_train"
+    test_dataset: "ai_test"
+
+metrics:
+  primary: ["accuracy", "precision", "recall", "f1", "false_negative_rate", "roc_auc"]
+  generate_confusion_matrix: true
+  save_predictions: true
+
+backend:
+  app_name: "SecureCode AI Backend"
+  version: "1.0.0"
+  api_prefix: "/api/v1"
+  default_model: "codebert"
+  available_models:
+    - id: "tfidf_logistic_regression"
+      display_name: "TF-IDF + Logistic Regression"
+      type: "classical"
+    - id: "tfidf_linear_svm"
+      display_name: "TF-IDF + Linear SVM"
+      type: "classical"
+    - id: "codebert"
+      display_name: "Fine-tuned CodeBERT"
+      type: "transformer"

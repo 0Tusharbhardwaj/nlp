@@ -1,0 +1,125 @@
+# ==============================================================================
+# SecureCode AI - Git Ignore Configuration
+# Ensures reproducibility while keeping large datasets, checkpoints, secrets,
+# and build artifacts out of version control.
+# ==============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.pfx
+secrets.yaml
+credentials.json
+
+# Datasets (Keep directory structure via .gitkeep, ignore data files)
+datasets/raw/*
+!datasets/raw/.gitkeep
+datasets/processed/*
+!datasets/processed/.gitkeep
+datasets/external/*
+!datasets/external/.gitkeep
+datasets/reports/*
+!datasets/reports/.gitkeep
+*.csv
+*.jsonl
+*.parquet
+*.arrow
+*.tar.gz
+*.zip
+*.7z
+
+# Model Weights, Checkpoints & Artifacts
+checkpoints/
+models/weights/
+results/checkpoints/
+results/models/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.pkl
+*.joblib
+*.h5
+
+# Experiment & Evaluation Outputs
+results/runs/
+results/logs/
+results/metrics/*
+!results/metrics/.gitkeep
+results/figures/*
+!results/figures/.gitkeep
+*.log
+events.out.tfevents.*
+wandb/
+mlruns/
+
+# Google Colab & Google Drive mounts
+/content/drive/
+.colab/
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# IDE and Editor configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Frontend (Node / React)
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
