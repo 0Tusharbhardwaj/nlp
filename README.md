@@ -1,159 +1,175 @@
 # SecureCode AI — Security & Vulnerability Detection for LLM-Generated Code
 
-[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![Transformers](https://img.shields.io/badge/Hugging%20Face-Transformers-yellow.svg)](https://huggingface.co/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61dafb.svg)](https://react.dev/)
+[![React](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite%208-61dafb.svg)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v3.4-38bdf8.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-SecureCode AI is a reproducible, research-grade machine learning system designed to detect software vulnerabilities in source code. Its primary scientific focus is evaluating whether vulnerability detection models trained on historical human-written code can generalize to identify security flaws in AI-generated and AI-assisted source code.
+SecureCode AI is a research-grade machine learning system designed to detect software vulnerabilities in source code. Its primary scientific focus is investigating whether vulnerability detection models trained on historical human-written code generalize to identify security flaws in AI-generated and AI-assisted code.
+
+- **GitHub Repository**: [https://github.com/0Tusharbhardwaj/nlp](https://github.com/0Tusharbhardwaj/nlp)
+- **Scientific Research Paper**: [docs/RESEARCH_PAPER.md](docs/RESEARCH_PAPER.md)
+- **Experiment Plan**: [docs/EXPERIMENT_PLAN.md](docs/EXPERIMENT_PLAN.md)
+- **Architecture Documentation**: [docs/PROJECT_ARCHITECTURE.md](docs/PROJECT_ARCHITECTURE.md)
 
 ---
 
-## 🎯 Research Objectives
+## 🎯 Research Objectives & Findings
 
-1. **Evaluate Cross-Domain Generalization**: Determine whether fine-tuned models like Microsoft CodeBERT trained on human code (CodeXGLUE / Devign) can detect vulnerabilities in LLM-generated code (LLMVul).
-2. **Quantify False Negative Risk**: Measure the False Negative Rate (FNR) spike when models encounter AI-generated syntactic patterns.
+1. **Evaluate Cross-Domain Generalization**: Determine whether fine-tuned models like Microsoft CodeBERT and classical baselines trained on human code (CodeXGLUE / Devign) can detect vulnerabilities in LLM-generated code (LLMVul).
+2. **Quantify False Negative Risk**: Measure the False Negative Rate (FNR = 1 - Recall) spike when models encounter AI-generated syntactic patterns.
 3. **Compare Classical Baselines vs. Transformers**: Benchmark TF-IDF + Logistic Regression and TF-IDF + Linear SVM against CodeBERT sequence classifiers.
-4. **Deploy Real-World Inference**: Provide a low-latency, validated FastAPI backend and an interactive React + Monaco Editor scanning dashboard.
-
-For detailed experiment designs, see [docs/EXPERIMENT_PLAN.md](file:///docs/EXPERIMENT_PLAN.md).  
-For the complete system architecture, see [docs/PROJECT_ARCHITECTURE.md](file:///docs/PROJECT_ARCHITECTURE.md).
+4. **Deploy Real-World Inference**: Provide a low-latency (<15 ms), validated FastAPI backend and an interactive React + Monaco Editor scanning dashboard.
 
 ---
 
-## 📁 Project Architecture
+## 📁 Repository Layout
 
 ```text
 SecureCode-AI/
 ├── datasets/                       # Datasets (raw, processed, external, reports)
 │   ├── raw/                        # Original benchmark archives
-│   ├── processed/                  # Normalized, deduplicated, split data
-│   ├── external/                   # External evaluation benchmarks (LLMVul)
-│   └── reports/                    # Dataset profiling and schema audits
+│   ├── processed/                  # Normalized, deduplicated, split data (Devign, LLMVul, SeCodePLT)
+│   └── reports/                    # Suitability, audit, and preprocessing reports
 ├── notebooks/                      # Colab GPU training notebooks
+│   └── 01_codebert_finetuning.ipynb # Self-contained Google Colab GPU training pipeline
 ├── src/                            # Machine learning core package
-│   ├── data/                       # Ingestion scripts & loaders
-│   ├── preprocessing/              # Tokenization, safe cleaning, deduplication
+│   ├── data/                       # Ingestion loaders & analyzer
+│   ├── preprocessing/              # 5-state lexer safe comment stripper & token length audit
 │   ├── models/                     # CodeBERT & classical baseline definitions
 │   ├── training/                   # PyTorch training loops & checkpointing
-│   ├── evaluation/                 # Metrics, FNR, and confusion matrices
-│   ├── inference/                  # Prediction engine for production serving
-│   └── utils/                      # Config loaders, seeds, hardware utils
+│   ├── evaluation/                 # Metrics, FNR, visualizer, cross-evaluator
+│   └── utils/                      # Hardware, config, and seed utilities
 ├── backend/                        # FastAPI REST API
 │   └── app/
-│       ├── api/                    # API route endpoints
-│       ├── services/               # Model inference service orchestrators
+│       ├── api/                    # Route endpoints (health, scan, models, datasets, experiments)
+│       ├── services/               # Model inference singleton & data services
 │       ├── schemas/                # Pydantic validation schemas
 │       ├── core/                   # App settings & CORS configuration
 │       └── main.py                 # FastAPI application entry point
-├── frontend/                       # React + TypeScript + Monaco Editor interface
-├── configs/                        # YAML configuration files
-│   └── base.yaml                   # Central project & training hyperparameters
-├── scripts/                        # Reproducible automation scripts
-├── tests/                          # Automated Pytest suite
-├── results/                        # Outputs (checkpoints, metrics, figures)
-└── docs/                           # Architecture and experiment plans
+├── frontend/                       # React 19 + TypeScript + Monaco Editor interface
+│   ├── src/
+│   │   ├── components/             # Scanner, Experiments, Datasets, Methodology, Header, Footer
+│   │   ├── services/               # API client
+│   │   └── types/                  # TypeScript API contracts
+│   └── tailwind.config.js          # Tailwind CSS v3 theme configuration
+├── configs/                        # YAML configuration files (base.yaml, preprocessing.yaml)
+├── docker/                         # Dockerfiles for backend, frontend & Nginx config
+├── docker-compose.yml              # Multi-container orchestration
+├── run_app.py                      # One-command cross-platform launcher (Backend + Frontend)
+├── run_app.bat                     # Windows one-click launcher
+├── run_app.sh                      # Linux/macOS one-click launcher
+├── scripts/                        # Automation & audit scripts
+│   ├── verify_system.py            # End-to-end integration verification audit
+│   ├── audit_datasets.py           # Dataset quality & deduplication inspector
+│   ├── preprocess_data.py          # Data preprocessing pipeline runner
+│   ├── train_baselines.py          # Classical baseline model trainer
+│   ├── train_codebert.py           # CodeBERT training CLI
+│   └── run_cross_evaluation.py     # Cross-dataset evaluation runner (E1-E4)
+├── tests/                          # 39 automated unit & integration tests
+├── results/                        # Models, metrics (JSON/CSV), figures (PNG), logs
+└── docs/                           # Research paper, architecture, experiment plans
 ```
 
 ---
 
-## 🛠️ Technology Stack
+## ⚡ Quick Start: Running the Full Application
 
-- **Machine Learning**: Python 3.11, PyTorch, Hugging Face Transformers (`microsoft/codebert-base`), Datasets, Scikit-learn, Pandas, NumPy.
-- **Training Acceleration**: Google Colab NVIDIA T4/V100/A100 GPU with Google Drive checkpoint storage.
-- **Backend API**: FastAPI, Pydantic v2, Uvicorn.
-- **Frontend Dashboard**: React, TypeScript, Tailwind CSS, Monaco Editor, Recharts.
-- **Experiment Management & Rigor**: PyYAML, deterministic seeding (`seed=42`), MinHash near-duplicate filtering.
+### 1. Launch with One Command (Backend + Frontend)
 
----
+```bash
+# Cross-platform (Windows / Linux / macOS)
+python run_app.py
 
-## 🚀 Setup & Installation
+# Or on Windows:
+run_app.bat
 
-### Option 1: Local Development Setup (Python 3.11)
+# Or on Linux / macOS:
+chmod +x run_app.sh && ./run_app.sh
+```
 
-1. **Clone or navigate to the workspace**:
-   ```bash
-   cd "c:/Users/tusha/OneDrive/Desktop/sem 5/nlp"
-   ```
-
-2. **Create and activate a virtual environment**:
-   ```bash
-   # Windows (PowerShell)
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-
-   # Linux / macOS
-   python3.11 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-
-4. **Configure environment variables**:
-   ```bash
-   cp .env.example .env
-   ```
-
-5. **Run tests**:
-   ```bash
-   pytest tests/ -v
-   ```
-
-6. **Start the FastAPI backend server**:
-   ```bash
-   uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
-   ```
-   API interactive documentation will be accessible at: `http://localhost:8000/docs`.
+- **Interactive Web Dashboard**: `http://localhost:5173`
+- **FastAPI Interactive Docs**: `http://localhost:8000/docs`
+- **Health & Telemetry**: `http://localhost:8000/api/v1/health`
 
 ---
 
-### Option 2: Google Colab GPU Setup (For Model Training)
+### 2. End-to-End System Verification Audit
 
-CodeBERT fine-tuning is performed on Google Colab GPU to leverage NVIDIA tensor cores:
+Run the automated integration audit to verify checkpoints, processed datasets, API responses, inference latencies, and frontend assets:
 
-1. **Open Google Colab** and select a GPU runtime (`Runtime > Change runtime type > T4 GPU`).
-2. **Mount Google Drive** to persist dataset caches and model weights:
-   ```python
-   from google.colab import drive
-   drive.mount('/content/drive')
-   ```
-3. **Clone or upload project files**:
-   ```bash
-   !git clone <YOUR_REPO_URL> /content/SecureCode-AI
-   %cd /content/SecureCode-AI
-   ```
-4. **Install requirements**:
-   ```bash
-   !pip install -r requirements.txt
-   ```
-5. **Open and run the training notebook**:
-   Open `notebooks/01_codebert_finetuning.ipynb` and execute cells sequentially.
-6. Checkpoints and evaluation metrics will save directly to `/content/drive/MyDrive/SecureCode-AI/checkpoints/`.
+```bash
+python scripts/verify_system.py
+```
+
+### 3. Run Test Suite
+
+```bash
+python -m unittest discover -s tests -v
+# 39 unit and integration tests run across all phases
+```
 
 ---
 
-## 🔬 Scientific Integrity & Non-Fabrication Rules
+## 🐳 Docker Deployment
 
-- **Zero Synthetic Metrics**: Metrics reported in dashboards, tables, and papers reflect genuine evaluation runs over verified dataset splits.
-- **Strict Leakage Prevention**: Training, validation, and test sets are strictly isolated before feature extraction and tokenization. Cross-split near-duplicate checking is enforced.
-- **Realistic Output**: The scanner outputs probabilistic vulnerability estimates and confidence levels, explicitly noting model limitations without fabricating nonexistent vulnerability lines or fake CWE classifications.
+To launch SecureCode AI in production containers using Docker Compose:
+
+```bash
+# Build and start both Backend and Frontend containers
+docker-compose up --build -d
+
+# View status
+docker-compose ps
+```
+
+- **Frontend Application**: `http://localhost:3000`
+- **Backend API**: `http://localhost:8000`
 
 ---
 
-## 🗺️ Project Roadmap
+## 🔬 Google Colab GPU Training (CodeBERT)
+
+For GPU acceleration and fine-tuning CodeBERT:
+1. Open [`notebooks/01_codebert_finetuning.ipynb`](notebooks/01_codebert_finetuning.ipynb) in Google Colab.
+2. Select **Runtime > Change runtime type > T4 GPU**.
+3. Execute all cells sequentially. Checkpoints and evaluation metrics will automatically save to Google Drive and can be placed in `results/checkpoints/best_codebert.pt`.
+
+---
+
+## 📊 Summary of Cross-Dataset Experiments (E1–E4)
+
+| Experiment | Training Set | Evaluation Set | Focus Metric |
+| :--- | :--- | :--- | :--- |
+| **E1: Human In-Distribution** | Devign Train (Human) | Devign Test (Human) | Benchmark Human Baseline |
+| **E2: Zero-Shot AI Transfer** | Devign Train (Human) | LLMVul (AI Code) | Generalization Gap & FNR Spike |
+| **E3: Joint Adaptation** | Devign + AI Train | LLMVul Test (Disjoint AI) | Adaptation Recovery |
+| **E4: AI-Native In-Distribution** | LLMVul Train (AI Code) | LLMVul Test (Disjoint AI) | AI-Native Performance |
+
+---
+
+## 🗺️ Project Roadmap Status
 
 - [x] **Phase 1**: Project Architecture, Repository Layout, Documentation & Configs.
-- [ ] **Phase 2**: Dataset Engineering (CodeXGLUE/Devign, LLMVul, SECODEPLT, HumanVsAICode).
-- [ ] **Phase 3**: Reproducible Data Preprocessing & Deduplication Pipeline.
-- [ ] **Phase 4**: Classical ML Baselines (TF-IDF + Logistic Regression, TF-IDF + Linear SVM).
-- [ ] **Phase 5**: CodeBERT Fine-Tuning on Google Colab GPU.
-- [ ] **Phase 6**: Cross-Dataset Evaluation (E1–E4) & False Negative Rate Analysis.
-- [ ] **Phase 7**: Production-Grade FastAPI Backend & Inference Engine.
-- [ ] **Phase 8**: React + TypeScript + Monaco Editor Frontend Dashboard.
-- [ ] **Phase 9 & 10**: Integration Testing, Verification Audit & Research Reporting.
+- [x] **Phase 2**: Dataset Engineering (CodeXGLUE/Devign, LLMVul, SeCodePLT, HumanVsAICode).
+- [x] **Phase 3**: Reproducible Data Preprocessing & Untruncated Token Length Audit.
+- [x] **Phase 4**: Classical ML Baselines (TF-IDF + Logistic Regression, TF-IDF + Linear SVM).
+- [x] **Phase 5**: CodeBERT Fine-Tuning Pipeline & Executable Google Colab GPU Notebook.
+- [x] **Phase 6**: Cross-Dataset Evaluation (E1–E4), Disjoint AI Splits & FNR Spike Analysis.
+- [x] **Phase 7**: Production-Grade FastAPI Backend & Inference Engine.
+- [x] **Phase 8**: React 19 + TypeScript + Monaco Editor + Recharts Frontend Dashboard.
+- [x] **Phase 9**: End-to-End System Integration, Launchers, Verification Audit & Dockerization.
+- [x] **Phase 10**: Comprehensive Scientific Research Paper (`docs/RESEARCH_PAPER.md`).
+
+---
+
+## 📜 Scientific Disclaimer
+
+This platform provides machine-learning vulnerability predictions for empirical research and defensive analysis. Outputs represent statistical estimations rather than mathematical proofs or formal verifications. It should be used in conjunction with dynamic security analysis and human code audits.
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
