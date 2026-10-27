@@ -1,0 +1,68 @@
+# ==============================================================================
+# SecureCode AI - Preprocessing Configuration Profiles
+# Separate, reproducible preprocessing definitions for each evaluated dataset
+# ==============================================================================
+
+tokenizer:
+  model_name: "microsoft/codebert-base"
+  target_sequence_length: 512
+  length_thresholds: [128, 256, 512, 1024]
+
+deduplication:
+  exact_hash: "md5"
+  near_duplicate_method: "minhash"
+  similarity_threshold: 0.85
+
+datasets:
+  # 1. CodeXGLUE / Devign (Primary In-Distribution C Benchmark)
+  devign:
+    enabled: true
+    source_language: "c"
+    raw_path: "datasets/raw/devign"
+    processed_path: "datasets/processed/devign"
+    splits: ["train", "valid", "test"]
+    classical_baseline:
+      strip_comments: false      # Safe: keeps URLs and avoids token destruction
+      normalize_whitespace: true
+      lowercase: false
+    codebert:
+      preserve_structure: true
+      normalize_whitespace: true
+      target_length: 512
+    task_type: "binary_classification"
+
+  # 2. LLMVul (External Cross-Distribution AI C/C++ Benchmark)
+  llmvul:
+    enabled: true
+    source_language: "c_cpp"
+    raw_path: "datasets/raw/llmvul"
+    processed_path: "datasets/processed/llmvul"
+    splits: ["external"]
+    classical_baseline:
+      strip_comments: false
+      normalize_whitespace: true
+      lowercase: false
+    codebert:
+      preserve_structure: true
+      normalize_whitespace: true
+      target_length: 512
+    task_type: "cross_distribution_binary_classification"
+    cwe_tracking: true
+
+  # 3. SECODEPLT (Supplementary Security Evaluation Benchmark)
+  secodeplt:
+    enabled: true
+    source_language: "c_cpp_python"
+    raw_path: "datasets/raw/secodeplt"
+    processed_path: "datasets/processed/secodeplt"
+    splits: ["supplementary"]
+    filter_task_type: "vulnerability_detection" # Excludes generative patching tasks
+    classical_baseline:
+      strip_comments: false
+      normalize_whitespace: true
+      lowercase: false
+    codebert:
+      preserve_structure: true
+      normalize_whitespace: true
+      target_length: 512
+    task_type: "supplementary_classification"
