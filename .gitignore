@@ -54,6 +54,7 @@ datasets/external/*
 !datasets/external/.gitkeep
 datasets/reports/*
 !datasets/reports/.gitkeep
+!datasets/reports/*.md
 *.csv
 *.jsonl
 *.parquet
