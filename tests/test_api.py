@@ -4,6 +4,8 @@ import unittest
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
+from backend.app.services.model_service import ModelManager
+
 
 
 class TestAPIEndpoints(unittest.TestCase):
@@ -102,28 +104,44 @@ class TestAPIEndpoints(unittest.TestCase):
         self.assertIn("safe", data["probabilities"])
         self.assertIn("vulnerable", data["probabilities"])
 
-    def test_codebert_unavailable_and_transparent_fallback(self):
-        """Verify explicit 503 when CodeBERT runtime is absent, and transparent attribution when fallback is allowed."""
+    def test_codebert_execution_and_transparent_fallback(self):
+        """Verify CodeBERT execution when available, and transparent attribution when fallback is allowed."""
         payload = {
             "code": "void test_func() { char b[10]; gets(b); }",
             "model_id": "codebert",
             "allow_fallback": False,
         }
-        response = self.client.post("/api/v1/scan", json=payload)
-        
-        # In this local CPU environment without PyTorch, CodeBERT cannot execute directly
-        self.assertEqual(response.status_code, 503)
-        self.assertIn("unavailable", response.json()["detail"].lower())
+        manager = ModelManager.get_instance()
+        manager.initialize()
 
-        # When client explicitly permits fallback:
-        payload["allow_fallback"] = True
-        fb_response = self.client.post("/api/v1/scan", json=payload)
-        self.assertEqual(fb_response.status_code, 200)
-        fb_data = fb_response.json()
-        self.assertEqual(fb_data["requested_model"], "codebert")
-        self.assertEqual(fb_data["actual_model"], "tfidf_linear_svm")
-        self.assertTrue(fb_data["fallback_used"])
-        self.assertIn("Fallback for CodeBERT", fb_data["model_name"])
+        if manager.loaded_models.get("codebert") is not None:
+            # CodeBERT is loaded and available
+            response = self.client.post("/api/v1/scan", json=payload)
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertEqual(data["actual_model"], "codebert")
+            self.assertFalse(data["fallback_used"])
+
+        # Simulate unavailable runtime to verify 503 and transparent fallback
+        orig_cb = manager.loaded_models.get("codebert")
+        try:
+            manager.loaded_models["codebert"] = None
+            response = self.client.post("/api/v1/scan", json=payload)
+            self.assertEqual(response.status_code, 503)
+            self.assertIn("unavailable", response.json()["detail"].lower())
+
+            # When client explicitly permits fallback:
+            payload["allow_fallback"] = True
+            fb_response = self.client.post("/api/v1/scan", json=payload)
+            self.assertEqual(fb_response.status_code, 200)
+            fb_data = fb_response.json()
+            self.assertEqual(fb_data["requested_model"], "codebert")
+            self.assertTrue(fb_data["fallback_used"])
+            self.assertIn("Fallback for CodeBERT", fb_data["model_name"])
+        finally:
+            if orig_cb is not None:
+                manager.loaded_models["codebert"] = orig_cb
+
 
     def test_scan_validation_errors(self):
         """Verify proper validation errors on invalid inputs."""

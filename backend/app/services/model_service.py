@@ -105,7 +105,7 @@ class ModelManager:
                 loaded = joblib.load(svm_path)
                 if isinstance(loaded, TFIDFLinearSVM):
                     self.loaded_models["tfidf_linear_svm"] = loaded
-                elif isinstance(loaded, LinearSVC) or hasattr(loaded, "decision_function"):
+                else:
                     wrapped = TFIDFLinearSVM()
                     wrapped.classifier = loaded
                     for v_name in ["tfidf_vectorizer_full.joblib", "tfidf_vectorizer_devign.joblib", "tfidf_vectorizer.joblib"]:
@@ -115,8 +115,6 @@ class ModelManager:
                             wrapped.is_fitted = True
                             break
                     self.loaded_models["tfidf_linear_svm"] = wrapped
-                else:
-                    self.loaded_models["tfidf_linear_svm"] = loaded
                 status_svm = "ready"
             except Exception as e:
                 status_svm = f"load_failed: {str(e)}"

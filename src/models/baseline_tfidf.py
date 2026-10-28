@@ -141,7 +141,11 @@ class TFIDFLinearSVM(BaseTFIDFClassifier):
     def decision_function(self, texts: List[str]) -> np.ndarray:
         """Compute distance of samples to the separating hyperplane."""
         X = self.transform(texts)
-        return self.classifier.decision_function(X)
+        if hasattr(self.classifier, "decision_function"):
+            return self.classifier.decision_function(X)
+        probs = self.classifier.predict_proba(X)[:, 1]
+        probs = np.clip(probs, 1e-7, 1.0 - 1e-7)
+        return np.log(probs / (1.0 - probs))
 
     def predict(self, texts: List[str]) -> np.ndarray:
         """Predict binary vulnerability labels (0 = safe, 1 = vulnerable)."""
@@ -149,13 +153,13 @@ class TFIDFLinearSVM(BaseTFIDFClassifier):
         return self.classifier.predict(X)
 
     def predict_proba(self, texts: List[str]) -> np.ndarray:
-        """Approximate class probabilities via Platt scaling (sigmoid on decision function).
-        
-        Returns:
-            2D array of shape (n_samples, 2): [P(safe), P(vulnerable)].
-        """
-        scores = self.decision_function(texts)
+        """Compute class probabilities via CalibratedClassifierCV or Platt scaling sigmoid."""
+        X = self.transform(texts)
+        if hasattr(self.classifier, "predict_proba"):
+            return self.classifier.predict_proba(X)
+        scores = self.classifier.decision_function(X)
         # Sigmoid: P(y=1) = 1 / (1 + exp(-score))
         p1 = 1.0 / (1.0 + np.exp(-np.clip(scores, -20, 20)))
         p0 = 1.0 - p1
         return np.column_stack([p0, p1])
+
