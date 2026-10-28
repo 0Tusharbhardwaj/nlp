@@ -551,7 +551,6 @@ def generate_codebert_training_notebook() -> dict:
             "    train_dataset=tokenized_train,",
             "    eval_dataset=tokenized_val,",
             "    compute_metrics=compute_metrics,",
-            "    tokenizer=tokenizer,",
             ")",
             "",
             "print('[OK] Trainer configured. Ready to begin training.')"
