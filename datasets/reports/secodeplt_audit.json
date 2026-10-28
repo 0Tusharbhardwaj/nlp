@@ -1,0 +1,87 @@
+{
+  "dataset_name": "secodeplt",
+  "total_samples": 4,
+  "missing_values": {
+    "sample_id": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "source_dataset": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "code": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "label": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "language": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "provenance": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "repository_id": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "cwe_id": {
+      "missing_count": 2,
+      "missing_percentage": 50.0,
+      "present_count": 2
+    },
+    "label_confidence": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    },
+    "split": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 4
+    }
+  },
+  "label_distribution": {
+    "total_samples": 4,
+    "non_vulnerable_count (0)": 2,
+    "vulnerable_count (1)": 2,
+    "unlabeled_or_ambiguous_count": 0,
+    "vulnerability_rate": 50.0,
+    "class_imbalance_ratio_0_to_1": 1.0
+  },
+  "language_distribution": {
+    "c": {
+      "count": 2,
+      "percentage": 50.0
+    },
+    "python": {
+      "count": 2,
+      "percentage": 50.0
+    }
+  },
+  "exact_duplicates": {
+    "total_samples": 4,
+    "unique_code_count": 4,
+    "duplicate_sample_count": 0,
+    "duplicate_rate_percentage": 0.0,
+    "duplicate_clusters_count": 0
+  },
+  "near_duplicates": {
+    "evaluated_samples_count": 4,
+    "threshold": 0.85,
+    "near_duplicate_pairs_count": 0,
+    "near_duplicate_pairs": []
+  }
+}

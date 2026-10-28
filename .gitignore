@@ -1,7 +1,7 @@
 # ==============================================================================
 # SecureCode AI - Git Ignore Configuration
-# Ensures reproducibility while keeping large datasets, checkpoints, secrets,
-# and build artifacts out of version control.
+# Ensures reproducibility while keeping large checkpoints, virtual environments,
+# and system artifacts out of version control.
 # ==============================================================================
 
 # Byte-compiled / optimized / DLL files
@@ -45,48 +45,29 @@ venv.bak/
 secrets.yaml
 credentials.json
 
-# Datasets (Keep directory structure via .gitkeep, ignore data files)
-datasets/raw/*
-!datasets/raw/.gitkeep
-datasets/processed/*
-!datasets/processed/.gitkeep
-datasets/external/*
-!datasets/external/.gitkeep
-datasets/reports/*
-!datasets/reports/.gitkeep
-!datasets/reports/*.md
-*.csv
-*.jsonl
+# Large Archives & Raw Downloads (Preserve processed research benchmarks)
 *.parquet
 *.arrow
 *.tar.gz
 *.zip
 *.7z
 
-# Model Weights, Checkpoints & Artifacts
+# Heavy Deep Learning Checkpoints (>100MB)
 checkpoints/
 models/weights/
 results/checkpoints/
-results/models/
 *.pt
 *.pth
 *.bin
 *.safetensors
 *.onnx
-*.pkl
-*.joblib
-*.h5
+
+# Allow serialized classical baseline models (tiny ~2KB joblib files)
+!results/models/*.joblib
 
 # Experiment & Evaluation Outputs
 results/runs/
 results/logs/
-results/metrics/*
-!results/metrics/.gitkeep
-!results/metrics/*.json
-!results/metrics/*.csv
-results/figures/*
-!results/figures/.gitkeep
-!results/figures/*.png
 *.log
 events.out.tfevents.*
 wandb/

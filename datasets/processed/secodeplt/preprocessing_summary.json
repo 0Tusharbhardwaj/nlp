@@ -1,0 +1,56 @@
+{
+  "dataset_name": "secodeplt",
+  "processed_splits_summary": {
+    "supplementary": 4
+  },
+  "token_length_distribution": {
+    "total_samples": 4,
+    "min_tokens": 31,
+    "max_tokens": 54,
+    "mean_tokens": 44.5,
+    "median_tokens": 46.5,
+    "p75_tokens": 52.5,
+    "p90_tokens": 53.4,
+    "p95_tokens": 53.7,
+    "p99_tokens": 53.94,
+    "truncation_analysis": {
+      "exceeding_128": {
+        "threshold": 128,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      },
+      "exceeding_256": {
+        "threshold": 256,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      },
+      "exceeding_512": {
+        "threshold": 512,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      },
+      "exceeding_1024": {
+        "threshold": 1024,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      }
+    }
+  },
+  "cross_split_leakage_audit": {
+    "total_cross_split_exact_leaks": 0,
+    "comparisons": {}
+  },
+  "repository_overlap_audit": {
+    "repository_distribution": {
+      "supplementary": [
+        "coreutils",
+        "django_example"
+      ]
+    },
+    "cross_split_repository_overlap": {}
+  }
+}

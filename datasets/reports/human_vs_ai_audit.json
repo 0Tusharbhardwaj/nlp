@@ -1,0 +1,83 @@
+{
+  "dataset_name": "human_vs_ai",
+  "total_samples": 8,
+  "missing_values": {
+    "sample_id": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "source_dataset": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "code": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "label": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "language": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "provenance": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "repository_id": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "cwe_id": {
+      "missing_count": 4,
+      "missing_percentage": 50.0,
+      "present_count": 4
+    },
+    "label_confidence": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    },
+    "split": {
+      "missing_count": 0,
+      "missing_percentage": 0.0,
+      "present_count": 8
+    }
+  },
+  "label_distribution": {
+    "total_samples": 8,
+    "non_vulnerable_count (0)": 5,
+    "vulnerable_count (1)": 3,
+    "unlabeled_or_ambiguous_count": 0,
+    "vulnerability_rate": 37.5,
+    "class_imbalance_ratio_0_to_1": 1.67
+  },
+  "language_distribution": {
+    "python": {
+      "count": 8,
+      "percentage": 100.0
+    }
+  },
+  "exact_duplicates": {
+    "total_samples": 8,
+    "unique_code_count": 8,
+    "duplicate_sample_count": 0,
+    "duplicate_rate_percentage": 0.0,
+    "duplicate_clusters_count": 0
+  },
+  "near_duplicates": {
+    "evaluated_samples_count": 8,
+    "threshold": 0.85,
+    "near_duplicate_pairs_count": 0,
+    "near_duplicate_pairs": []
+  }
+}

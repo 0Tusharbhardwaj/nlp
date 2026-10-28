@@ -1,0 +1,231 @@
+{
+  "devign": {
+    "dataset_name": "devign",
+    "processed_splits_summary": {
+      "train": 4,
+      "valid": 2,
+      "test": 2
+    },
+    "token_length_distribution": {
+      "total_samples": 8,
+      "min_tokens": 44,
+      "max_tokens": 94,
+      "mean_tokens": 58.88,
+      "median_tokens": 55.5,
+      "p75_tokens": 59.75,
+      "p90_tokens": 73.7,
+      "p95_tokens": 83.85,
+      "p99_tokens": 91.97,
+      "truncation_analysis": {
+        "exceeding_128": {
+          "threshold": 128,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_256": {
+          "threshold": 256,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_512": {
+          "threshold": 512,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_1024": {
+          "threshold": 1024,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        }
+      }
+    },
+    "cross_split_leakage_audit": {
+      "total_cross_split_exact_leaks": 0,
+      "comparisons": {
+        "train_vs_valid": {
+          "split_1": "train",
+          "split_2": "valid",
+          "common_hash_count": 0,
+          "leakage_detected": false,
+          "leaked_sample_pairs": []
+        },
+        "train_vs_test": {
+          "split_1": "train",
+          "split_2": "test",
+          "common_hash_count": 0,
+          "leakage_detected": false,
+          "leaked_sample_pairs": []
+        },
+        "valid_vs_test": {
+          "split_1": "valid",
+          "split_2": "test",
+          "common_hash_count": 0,
+          "leakage_detected": false,
+          "leaked_sample_pairs": []
+        }
+      }
+    },
+    "repository_overlap_audit": {
+      "repository_distribution": {
+        "train": [
+          "ffmpeg",
+          "qemu"
+        ],
+        "valid": [
+          "ffmpeg",
+          "qemu"
+        ],
+        "test": [
+          "ffmpeg",
+          "qemu"
+        ]
+      },
+      "cross_split_repository_overlap": {
+        "train_vs_valid": {
+          "train_repositories_count": 2,
+          "valid_repositories_count": 2,
+          "shared_repositories_count": 2,
+          "shared_repositories": [
+            "ffmpeg",
+            "qemu"
+          ]
+        },
+        "train_vs_test": {
+          "train_repositories_count": 2,
+          "test_repositories_count": 2,
+          "shared_repositories_count": 2,
+          "shared_repositories": [
+            "ffmpeg",
+            "qemu"
+          ]
+        },
+        "valid_vs_test": {
+          "valid_repositories_count": 2,
+          "test_repositories_count": 2,
+          "shared_repositories_count": 2,
+          "shared_repositories": [
+            "ffmpeg",
+            "qemu"
+          ]
+        }
+      }
+    }
+  },
+  "llmvul": {
+    "dataset_name": "llmvul",
+    "processed_splits_summary": {
+      "external": 4
+    },
+    "token_length_distribution": {
+      "total_samples": 4,
+      "min_tokens": 54,
+      "max_tokens": 61,
+      "mean_tokens": 58.75,
+      "median_tokens": 60.0,
+      "p75_tokens": 61.0,
+      "p90_tokens": 61.0,
+      "p95_tokens": 61.0,
+      "p99_tokens": 61.0,
+      "truncation_analysis": {
+        "exceeding_128": {
+          "threshold": 128,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_256": {
+          "threshold": 256,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_512": {
+          "threshold": 512,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_1024": {
+          "threshold": 1024,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        }
+      }
+    },
+    "cross_split_leakage_audit": {
+      "total_cross_split_exact_leaks": 0,
+      "comparisons": {}
+    },
+    "repository_overlap_audit": {
+      "repository_distribution": {
+        "external": [
+          "open-assistant/web-handler",
+          "ai-infra/socket-proxy",
+          "ai-assisted-iot/network-daemon"
+        ]
+      },
+      "cross_split_repository_overlap": {}
+    }
+  },
+  "secodeplt": {
+    "dataset_name": "secodeplt",
+    "processed_splits_summary": {
+      "supplementary": 4
+    },
+    "token_length_distribution": {
+      "total_samples": 4,
+      "min_tokens": 31,
+      "max_tokens": 54,
+      "mean_tokens": 44.5,
+      "median_tokens": 46.5,
+      "p75_tokens": 52.5,
+      "p90_tokens": 53.4,
+      "p95_tokens": 53.7,
+      "p99_tokens": 53.94,
+      "truncation_analysis": {
+        "exceeding_128": {
+          "threshold": 128,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_256": {
+          "threshold": 256,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_512": {
+          "threshold": 512,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        },
+        "exceeding_1024": {
+          "threshold": 1024,
+          "exceeding_count": 0,
+          "exceeding_percentage": 0.0,
+          "retained_within_window_percentage": 100.0
+        }
+      }
+    },
+    "cross_split_leakage_audit": {
+      "total_cross_split_exact_leaks": 0,
+      "comparisons": {}
+    },
+    "repository_overlap_audit": {
+      "repository_distribution": {
+        "supplementary": [
+          "coreutils",
+          "django_example"
+        ]
+      },
+      "cross_split_repository_overlap": {}
+    }
+  }
+}

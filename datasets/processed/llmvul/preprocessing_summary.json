@@ -1,0 +1,57 @@
+{
+  "dataset_name": "llmvul",
+  "processed_splits_summary": {
+    "external": 4
+  },
+  "token_length_distribution": {
+    "total_samples": 4,
+    "min_tokens": 54,
+    "max_tokens": 61,
+    "mean_tokens": 58.75,
+    "median_tokens": 60.0,
+    "p75_tokens": 61.0,
+    "p90_tokens": 61.0,
+    "p95_tokens": 61.0,
+    "p99_tokens": 61.0,
+    "truncation_analysis": {
+      "exceeding_128": {
+        "threshold": 128,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      },
+      "exceeding_256": {
+        "threshold": 256,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      },
+      "exceeding_512": {
+        "threshold": 512,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      },
+      "exceeding_1024": {
+        "threshold": 1024,
+        "exceeding_count": 0,
+        "exceeding_percentage": 0.0,
+        "retained_within_window_percentage": 100.0
+      }
+    }
+  },
+  "cross_split_leakage_audit": {
+    "total_cross_split_exact_leaks": 0,
+    "comparisons": {}
+  },
+  "repository_overlap_audit": {
+    "repository_distribution": {
+      "external": [
+        "open-assistant/web-handler",
+        "ai-infra/socket-proxy",
+        "ai-assisted-iot/network-daemon"
+      ]
+    },
+    "cross_split_repository_overlap": {}
+  }
+}
