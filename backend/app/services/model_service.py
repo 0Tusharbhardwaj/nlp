@@ -44,8 +44,12 @@ class ModelManager:
             return
 
         # 1. TF-IDF + Logistic Regression
-        lr_path = self.models_dir / "tfidf_logistic_regression.joblib"
-        if lr_path.exists():
+        lr_candidates = [
+            self.models_dir / "logistic_regression_devign.joblib",
+            self.models_dir / "tfidf_logistic_regression.joblib",
+        ]
+        lr_path = next((p for p in lr_candidates if p.exists()), None)
+        if lr_path:
             try:
                 self.loaded_models["tfidf_logistic_regression"] = TFIDFLogisticRegression.load(lr_path)
                 status_lr = "ready"
@@ -71,8 +75,12 @@ class ModelManager:
         }
 
         # 2. TF-IDF + Linear SVM
-        svm_path = self.models_dir / "tfidf_linear_svm.joblib"
-        if svm_path.exists():
+        svm_candidates = [
+            self.models_dir / "linear_svm_devign.joblib",
+            self.models_dir / "tfidf_linear_svm.joblib",
+        ]
+        svm_path = next((p for p in svm_candidates if p.exists()), None)
+        if svm_path:
             try:
                 self.loaded_models["tfidf_linear_svm"] = TFIDFLinearSVM.load(svm_path)
                 status_svm = "ready"
@@ -98,8 +106,9 @@ class ModelManager:
         }
 
         # 3. Microsoft CodeBERT
-        # Check all possible checkpoint names from Colab training
         possible_checkpoints = [
+            self.models_dir / "codebert_devign_full",
+            self.checkpoints_dir / "codebert_devign_full",
             self.checkpoints_dir / "codebert_best.pt",
             self.checkpoints_dir / "best_codebert.pt",
             self.checkpoints_dir / "codebert_finetuned",
@@ -114,20 +123,27 @@ class ModelManager:
                 break
 
         if self.codebert_checkpoint_path is not None:
-            # Attempt to load through PyTorch if torch and transformers are available
             try:
                 import torch
                 from src.models.codebert_classifier import CodeBERTClassifier
-                classifier = CodeBERTClassifier(device="cpu")
-                if classifier.is_available():
-                    ckpt = torch.load(self.codebert_checkpoint_path, map_location="cpu", weights_only=False)
-                    state = ckpt["model_state_dict"] if isinstance(ckpt, dict) and "model_state_dict" in ckpt else ckpt
-                    classifier.model.load_state_dict(state)
-                    classifier.model.eval()
-                    self.loaded_models["codebert"] = classifier
-                    status_codebert = "ready"
+                if self.codebert_checkpoint_path.is_dir():
+                    classifier = CodeBERTClassifier(model_name_or_path=str(self.codebert_checkpoint_path), device="cpu")
+                    if classifier.is_available():
+                        self.loaded_models["codebert"] = classifier
+                        status_codebert = "ready"
+                    else:
+                        status_codebert = "runtime_unavailable (transformers backbone initialization failed)"
                 else:
-                    status_codebert = "runtime_unavailable (transformers backbone initialization failed)"
+                    classifier = CodeBERTClassifier(device="cpu")
+                    if classifier.is_available():
+                        ckpt = torch.load(self.codebert_checkpoint_path, map_location="cpu", weights_only=False)
+                        state = ckpt["model_state_dict"] if isinstance(ckpt, dict) and "model_state_dict" in ckpt else ckpt
+                        classifier.model.load_state_dict(state)
+                        classifier.model.eval()
+                        self.loaded_models["codebert"] = classifier
+                        status_codebert = "ready"
+                    else:
+                        status_codebert = "runtime_unavailable (transformers backbone initialization failed)"
             except Exception as e:
                 status_codebert = f"runtime_unavailable (PyTorch runtime not loaded: {type(e).__name__})"
         else:
@@ -136,7 +152,7 @@ class ModelManager:
         ckpt_size_mb = (
             f" ({round(self.codebert_checkpoint_path.stat().st_size / (1024 * 1024), 1)} MB)"
             if self.codebert_checkpoint_path and self.codebert_checkpoint_path.is_file()
-            else ""
+            else (" (fine-tuned directory)" if self.codebert_checkpoint_path and self.codebert_checkpoint_path.is_dir() else "")
         )
 
         self.model_metadata["codebert"] = {
