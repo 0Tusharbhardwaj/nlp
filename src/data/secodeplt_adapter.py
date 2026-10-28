@@ -135,5 +135,7 @@ class SeCodePLTAdapter:
 
 if __name__ == "__main__":
     adapter = SeCodePLTAdapter()
-    samples = adapter.adapt_samples()
-    print(f"[OK] SeCodePLT Adapter generated {len(samples)} evaluation instances from {len(samples)//2} tasks.")
+    out_file = Path("datasets/processed/secodeplt_eval.jsonl")
+    count = adapter.export_evaluation_jsonl(out_file)
+    print(f"[OK] SeCodePLT Adapter exported {count} evaluation instances to {out_file}")
+
