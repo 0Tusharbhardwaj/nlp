@@ -114,7 +114,6 @@ class ModelManager:
                 break
 
         if self.codebert_checkpoint_path is not None:
-            status_codebert = "ready"
             # Attempt to load through PyTorch if torch and transformers are available
             try:
                 import torch
@@ -126,9 +125,11 @@ class ModelManager:
                     classifier.model.load_state_dict(state)
                     classifier.model.eval()
                     self.loaded_models["codebert"] = classifier
-            except Exception:
-                # Local environment without PyTorch; will use calibrated neural feature fallback
-                pass
+                    status_codebert = "ready"
+                else:
+                    status_codebert = "runtime_unavailable (transformers backbone initialization failed)"
+            except Exception as e:
+                status_codebert = f"runtime_unavailable (PyTorch runtime not loaded: {type(e).__name__})"
         else:
             status_codebert = "checkpoint_missing"
 
@@ -175,39 +176,72 @@ class ModelManager:
         return ModelDetails(**self.model_metadata[model_id])
 
     def scan(self, request: ScanRequest) -> ScanResponse:
-        """Execute single snippet vulnerability scanning."""
+        """Execute single snippet vulnerability scanning with transparent model attribution."""
         self.initialize()
-        model_id = request.model_id
+        requested_model = request.model_id
 
-        if model_id not in self.model_metadata:
+        if requested_model not in self.model_metadata:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unknown model_id '{model_id}'. Available models: {list(self.model_metadata.keys())}",
-            )
-
-        meta = self.model_metadata[model_id]
-
-        if meta["status"] != "ready":
-            if model_id == "codebert":
-                raise HTTPException(
-                    status_code=503,
-                    detail="CodeBERT checkpoint is not loaded. Train CodeBERT using the Colab GPU notebook (notebooks/01_codebert_finetuning.ipynb) and place weights in results/checkpoints/.",
-                )
-            raise HTTPException(
-                status_code=503,
-                detail=f"Model '{model_id}' is not ready: {meta['status']}.",
+                detail=f"Unknown model_id '{requested_model}'. Available models: {list(self.model_metadata.keys())}",
             )
 
         start_time = time.perf_counter()
+        fallback_used = False
 
-        # 1. Classical baseline inference
-        if meta["type"] == "classical":
-            model = self.loaded_models.get(model_id)
-            if model is None:
-                raise HTTPException(status_code=500, detail=f"Model '{model_id}' failed to load from memory.")
+        # Determine target execution model and resolve availability
+        if requested_model == "codebert":
+            cb_model = self.loaded_models.get("codebert")
+            if cb_model is None:
+                if not request.allow_fallback:
+                    meta = self.model_metadata["codebert"]
+                    raise HTTPException(
+                        status_code=503,
+                        detail=(
+                            f"Model 'codebert' is currently unavailable ({meta['status']}). "
+                            "PyTorch runtime is not installed or model weights could not be loaded into memory. "
+                            "To execute with transparent fallback to a classical baseline, set 'allow_fallback: true'."
+                        ),
+                    )
+                # Transparent fallback explicitly permitted by client
+                actual_model_id = (
+                    "tfidf_linear_svm"
+                    if "tfidf_linear_svm" in self.loaded_models
+                    else "tfidf_logistic_regression"
+                )
+                fallback_used = True
+                actual_meta = self.model_metadata[actual_model_id]
+                model_name = f"{actual_meta['name']} (Transparent Fallback for CodeBERT)"
+                model_type = "classical"
+            else:
+                actual_model_id = "codebert"
+                actual_meta = self.model_metadata["codebert"]
+                model_name = actual_meta["name"]
+                model_type = "transformer"
+        else:
+            actual_model_id = requested_model
+            actual_meta = self.model_metadata[actual_model_id]
+            if actual_meta["status"] != "ready" or actual_model_id not in self.loaded_models:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"Model '{actual_model_id}' is not ready: {actual_meta['status']}.",
+                )
+            model_name = actual_meta["name"]
+            model_type = actual_meta["type"]
+
+        # Execute genuine model inference
+        if actual_model_id == "codebert":
+            cleaned_code = prepare_for_codebert(request.code)
+            cb_model = self.loaded_models["codebert"]
+            probs = cb_model.predict_proba([cleaned_code])[0]
+            p0, p1 = float(probs[0]), float(probs[1])
+        else:
             cleaned_code = prepare_for_classical_baseline(request.code, strip_comments=False)
-            
-            # Apply calibrated Platt scaling so decision margins produce decisive probabilities
+            model = self.loaded_models.get(actual_model_id)
+            if model is None:
+                raise HTTPException(status_code=500, detail=f"Model '{actual_model_id}' failed to load from memory.")
+
+            # Calibrated Platt scaling for linear decision margin
             if hasattr(model, "decision_function"):
                 raw_score = float(model.decision_function([cleaned_code])[0])
                 scale_factor = 25.0
@@ -217,34 +251,17 @@ class ModelManager:
                 probs = model.predict_proba([cleaned_code])[0]
                 p0, p1 = float(probs[0]), float(probs[1])
 
-        # 2. CodeBERT Contextual inference
-        else:
-            cleaned_code = prepare_for_codebert(request.code)
-            cb_model = self.loaded_models.get("codebert")
-            if cb_model is not None:
-                probs = cb_model.predict_proba([cleaned_code])[0]
-                p0, p1 = float(probs[0]), float(probs[1])
-            else:
-                # Checkpoint is verified present on disk (1.4 GB).
-                # Compute calibrated contextual prediction using baseline representation with sharpened margin
-                baseline_ref = self.loaded_models.get("tfidf_linear_svm") or self.loaded_models.get("tfidf_logistic_regression")
-                if baseline_ref is not None:
-                    raw_score = float(baseline_ref.decision_function([cleaned_code])[0])
-                    scale_factor = 28.0  # Contextual transformer confidence sharpening
-                    p1 = float(1.0 / (1.0 + np.exp(-np.clip(scale_factor * raw_score, -15, 15))))
-                    p0 = float(1.0 - p1)
-                else:
-                    p0, p1 = 0.05, 0.95
-
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
-
         prediction = 1 if p1 >= 0.5 else 0
         confidence = float(max(p0, p1))
 
         return ScanResponse(
-            model_id=model_id,
-            model_name=meta["name"],
-            model_type=meta["type"],
+            model_id=actual_model_id,
+            model_name=model_name,
+            model_type=model_type,
+            requested_model=requested_model,
+            actual_model=actual_model_id,
+            fallback_used=fallback_used,
             is_vulnerable=(prediction == 1),
             prediction=prediction,
             confidence=round(confidence, 4),
@@ -264,6 +281,7 @@ class ModelManager:
                 code=item.code,
                 model_id=request.model_id,
                 language=item.language or "c",
+                allow_fallback=request.allow_fallback,
             )
             results.append(self.scan(single_req))
 

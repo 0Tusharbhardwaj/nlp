@@ -78,36 +78,53 @@ def plot_fnr_spike(eval_results: Dict[str, Any], output_path: Path) -> None:
 
 
 def generate_research_report(eval_results: Dict[str, Any]) -> str:
-    """Generate comprehensive scientific Markdown report for Phase 6."""
+    """Generate comprehensive scientific Markdown report distinguishing smoke tests from full-scale benchmarks."""
     lines = [
         "# SecureCode AI — Cross-Dataset Evaluation & Generalization Report",
         "",
-        "## 1. Executive Summary & Core Findings",
+        "## 1. Executive Summary & Experiment Integrity Classification",
         "",
-        "This empirical evaluation tests whether vulnerability detection models trained on historical human-written code (Devign)",
-        "can detect vulnerabilities in AI-generated and AI-assisted C/C++ code (LLMVul).",
+        "This empirical evaluation audits vulnerability detection models trained on historical human-written code (Devign)",
+        "against AI-generated and AI-assisted C/C++ code (LLMVul).",
         "",
-        "### Key Scientific Conclusions:",
-        "1. **Domain Shift & False Negative Spike (E1 vs. E2)**: Evaluating a human-trained model directly on AI-generated code reveals a measurable shift in detection recall.",
-        "2. **Mitigation via Joint Adaptation (E3)**: Jointly training on human code alongside a small partition of AI code recovers recall and mitigates false-negative vulnerability escapes on unseen AI code.",
-        "3. **AI-Native Representation (E4)**: AI-native models trained exclusively on AI code capture syntactic patterns specific to LLM completions.",
+        "### Experiment Maturity & Status Breakdown:",
+        "| Category | Experiments | Scope & Description |",
+        "| :--- | :--- | :--- |",
+        "| **Smoke Tests (Pipeline Verification)** | **E1, E2, E3** | Local pipeline validation on curated function cohorts ($N=2$ to $4$ test samples). Validates zero vectorizer leakage, comment stripping, and metric computation mechanics. |",
+        "| **Incomplete Experiments** | **E4 (AI-Native)** | Skipped due to 1-sample class collapse ($N_{train}=1$, label=1; 0 safe samples). Requires multi-repository stratified cohort. |",
+        "| **Experiments Awaiting Full Scale** | **E1–E4 (Full Benchmarks)** | Full-scale training on complete CodeXGLUE (27,318 functions) and LLMVul (226 repositories) on high-memory GPU runtimes. |",
+        "",
+        "### Key Empirical Findings on Smoke-Test Cohort:",
+        "1. **E1 Human In-Distribution**: Models predicted 100% of test samples as vulnerable (degenerate positive predictor), yielding 100% recall but 50% accuracy on balanced test set ($N=2$).",
+        "2. **E2 Zero-Shot AI Transfer**: Achieved 100% accuracy and 0.0% FNR across $N=4$ AI test samples. These high metrics are small-sample evaluation artifacts rather than proof of generalized AI security.",
+        "3. **E3 Joint Adaptation**: Retained 100% accuracy across $N=3$ repository-disjoint AI test samples.",
+        "4. **E4 AI-Native Baseline**: Incomplete due to single-class repository partition in the local smoke-test cohort.",
         "",
         "---",
         "",
         "## 2. Experimental Results Summary Table",
         "",
-        "| Experiment | Model | Accuracy | Precision | Recall | F1-Score | False Negative Rate (FNR) | ROC-AUC |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
+        "| Experiment | Model | Classification | Train $N$ | Test $N$ | Accuracy | Precision | Recall | F1-Score | False Negative Rate (FNR) | ROC-AUC |",
+        "| :--- | :--- | :--- | :---: | :---: | :--- | :--- | :--- | :--- | :--- | :--- |",
     ]
 
     for exp_id, exp_data in eval_results["experiments"].items():
         models_data = exp_data.get("models", {})
+        if models_data.get("status") == "skipped":
+            reason = models_data.get("reason", "unknown")
+            lines.append(
+                f"| **{exp_id}** | *All Models* | **Incomplete / Awaiting Full Data** | 1 | 3 | — | — | — | — | — | *Skipped ({reason})* |"
+            )
+            continue
+
         for m_key, m_val in models_data.items():
             if isinstance(m_val, dict) and "metrics" in m_val:
                 m = m_val["metrics"]
                 name = m_val["model_name"]
+                tr_count = m_val.get("train_samples_count", "—")
+                te_count = m_val.get("test_samples_count", "—")
                 lines.append(
-                    f"| **{exp_id}** | {name} | {m['accuracy']:.4f} | {m['precision']:.4f} | "
+                    f"| **{exp_id}** | {name} | **Smoke Test** | {tr_count} | {te_count} | {m['accuracy']:.4f} | {m['precision']:.4f} | "
                     f"{m['recall']:.4f} | **{m['f1_score']:.4f}** | **{m['false_negative_rate']:.4f}** | {m.get('roc_auc')} |"
                 )
 

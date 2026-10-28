@@ -95,9 +95,35 @@ class TestAPIEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["model_id"], "tfidf_linear_svm")
+        self.assertEqual(data["requested_model"], "tfidf_linear_svm")
+        self.assertEqual(data["actual_model"], "tfidf_linear_svm")
+        self.assertFalse(data["fallback_used"])
         self.assertIn(data["prediction"], [0, 1])
         self.assertIn("safe", data["probabilities"])
         self.assertIn("vulnerable", data["probabilities"])
+
+    def test_codebert_unavailable_and_transparent_fallback(self):
+        """Verify explicit 503 when CodeBERT runtime is absent, and transparent attribution when fallback is allowed."""
+        payload = {
+            "code": "void test_func() { char b[10]; gets(b); }",
+            "model_id": "codebert",
+            "allow_fallback": False,
+        }
+        response = self.client.post("/api/v1/scan", json=payload)
+        
+        # In this local CPU environment without PyTorch, CodeBERT cannot execute directly
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("unavailable", response.json()["detail"].lower())
+
+        # When client explicitly permits fallback:
+        payload["allow_fallback"] = True
+        fb_response = self.client.post("/api/v1/scan", json=payload)
+        self.assertEqual(fb_response.status_code, 200)
+        fb_data = fb_response.json()
+        self.assertEqual(fb_data["requested_model"], "codebert")
+        self.assertEqual(fb_data["actual_model"], "tfidf_linear_svm")
+        self.assertTrue(fb_data["fallback_used"])
+        self.assertIn("Fallback for CodeBERT", fb_data["model_name"])
 
     def test_scan_validation_errors(self):
         """Verify proper validation errors on invalid inputs."""

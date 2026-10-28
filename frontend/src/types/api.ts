@@ -33,12 +33,16 @@ export interface ScanRequest {
   code: string;
   model_id: string;
   language?: string;
+  allow_fallback?: boolean;
 }
 
 export interface ScanResponse {
   model_id: string;
   model_name: string;
   model_type: string;
+  requested_model?: string;
+  actual_model?: string;
+  fallback_used?: boolean;
   is_vulnerable: boolean;
   prediction: number;
   confidence: number;

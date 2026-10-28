@@ -229,7 +229,7 @@ export const ScannerTab: React.FC<ScannerTabProps> = ({ models, defaultModelId }
                   >
                     {models.map((m) => (
                       <option key={m.id} value={m.id} disabled={m.status !== 'ready'}>
-                        {m.name} {m.status === 'ready' ? '✓' : '(Missing Weights)'}
+                        {m.name} {m.status === 'ready' ? '✓' : m.status.includes('runtime') ? '(PyTorch Missing)' : '(Missing Weights)'}
                       </option>
                     ))}
                   </select>
@@ -324,6 +324,16 @@ export const ScannerTab: React.FC<ScannerTabProps> = ({ models, defaultModelId }
 
           {scanResult ? (
             <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-5 animate-in fade-in duration-300">
+              {/* Transparent Fallback Notice if active */}
+              {scanResult.fallback_used && (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>
+                    <strong>Transparent Fallback:</strong> The requested model (<code>{scanResult.requested_model}</code>) is unavailable. The prediction was executed using <strong>{scanResult.model_name}</strong>.
+                  </span>
+                </div>
+              )}
+
               {/* Threat Status Banner */}
               <div
                 className={`p-5 rounded-xl border flex items-center justify-between ${

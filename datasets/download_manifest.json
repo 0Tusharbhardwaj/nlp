@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-10-28T12:30:03.466292+00:00",
+  "dest_root": "C:\\Users\\tusha\\OneDrive\\Desktop\\sem 5\\nlp\\datasets\\raw\\full",
+  "datasets": {
+    "devign": {
+      "files": {
+        "train": {
+          "parquet_file": "datasets\\raw\\full\\devign\\train.parquet",
+          "parquet_bytes": 17847670,
+          "parquet_sha256": "e319c83e2e816a10aeeebe78668aa95b757b04e555700bf5f826766b0e80bb06",
+          "jsonl_file": "datasets\\raw\\full\\devign\\train.jsonl",
+          "jsonl_sha256": "8109d8f3ab7e05ffc4857ca5f2b0ac66b635acf40f20ec2e169b8ad83d3cffbd",
+          "sample_count": 21854,
+          "source_url": "https://huggingface.co/datasets/google/code_x_glue_cc_defect_detection/resolve/main/data/train-00000-of-00001.parquet"
+        },
+        "validation": {
+          "parquet_file": "datasets\\raw\\full\\devign\\validation.parquet",
+          "parquet_bytes": 2214315,
+          "parquet_sha256": "a17a76ed040d7f8657d1ff741f967b44704c008101ac958e2990ad468203cfa4",
+          "jsonl_file": "datasets\\raw\\full\\devign\\valid.jsonl",
+          "jsonl_sha256": "acf81358bcad481e2471c87c8fe6b339d344ee2fcdff8d8b6f6c64bc30548c8b",
+          "sample_count": 2732,
+          "source_url": "https://huggingface.co/datasets/google/code_x_glue_cc_defect_detection/resolve/main/data/validation-00000-of-00001.parquet"
+        },
+        "test": {
+          "parquet_file": "datasets\\raw\\full\\devign\\test.parquet",
+          "parquet_bytes": 2227970,
+          "parquet_sha256": "259c944eb4f8689e83895de476a00fe4cadf4839636769e725d3744fc36cfcd5",
+          "jsonl_file": "datasets\\raw\\full\\devign\\test.jsonl",
+          "jsonl_sha256": "a19c2e6a3996759d03d53b5e353167ea37a1d99a7ca03af181ee505c05355ebb",
+          "sample_count": 2732,
+          "source_url": "https://huggingface.co/datasets/google/code_x_glue_cc_defect_detection/resolve/main/data/test-00000-of-00001.parquet"
+        }
+      },
+      "status": "complete"
+    },
+    "llmvul": {
+      "files": {
+        "main_dataset": {
+          "csv_file": "datasets\\raw\\full\\llmvul\\LLMVul_v3-Updated.csv",
+          "csv_bytes": 46165548,
+          "csv_sha256": "eb0efbf912fb22d51cddd33ffa11e6f3e4add56b52cc9e78dae96621c819c293",
+          "description": "Full production repository LLM-generated functions with static tool consensus",
+          "source_url": "https://raw.githubusercontent.com/Wahed08/LLMVul-Dataset/main/data/LLMVul_v3-Updated.csv"
+        },
+        "manual_validation": {
+          "csv_file": "datasets\\raw\\full\\llmvul\\LLMVul_manual_review_100-Updated.csv",
+          "csv_bytes": 159851,
+          "csv_sha256": "a5b8d08a68107763642605db3df1b741e1db9a9e19a8a9b41360d639f8e5a1aa",
+          "description": "Expert manually validated holdout partition",
+          "source_url": "https://raw.githubusercontent.com/Wahed08/LLMVul-Dataset/main/manual_validation_set/LLMVul_manual_review_100-Updated.csv"
+        }
+      },
+      "status": "complete"
+    },
+    "secodeplt": {
+      "files": {
+        "c_vulnerability_detection": {
+          "parquet_file": "datasets\\raw\\full\\secodeplt\\c_vulnerability_detection.parquet",
+          "parquet_bytes": 4841139,
+          "parquet_sha256": "835d78e675cc7302bdb955888405b756534ef4e11bd37304c6912e00946fbdee",
+          "jsonl_file": "datasets\\raw\\full\\secodeplt\\c_vulnerability_detection.jsonl",
+          "jsonl_sha256": "248ef39787c364a8ab7640ccd3570038c3e8df16c053c5a30c559eaefec9e24f",
+          "sample_count": 1240,
+          "description": "C function vulnerability detection tasks with paired vulnerable/patched code references",
+          "source_url": "https://huggingface.co/datasets/UCSB-SURFI/SeCodePLT/resolve/main/data/c_vulnerability_detection-00000-of-00001.parquet"
+        }
+      },
+      "status": "complete"
+    }
+  }
+}

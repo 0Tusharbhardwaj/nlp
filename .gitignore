@@ -51,6 +51,13 @@ credentials.json
 *.tar.gz
 *.zip
 *.7z
+datasets/raw/*
+datasets/processed/*
+!datasets/raw/*/*.jsonl
+!datasets/processed/*/*.jsonl
+!datasets/processed/*/*.json
+!datasets/raw/**/.gitkeep
+!datasets/processed/**/.gitkeep
 
 # Heavy Deep Learning Checkpoints (>100MB)
 checkpoints/

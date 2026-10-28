@@ -22,6 +22,10 @@ class ScanRequest(BaseModel):
         default="c",
         description="Programming language of the snippet ('c', 'cpp', 'python').",
     )
+    allow_fallback: bool = Field(
+        default=False,
+        description="Whether to permit transparent fallback to a classical baseline if the requested model is unavailable.",
+    )
 
     @field_validator("code")
     @classmethod
@@ -37,6 +41,9 @@ class ScanResponse(BaseModel):
     model_id: str
     model_name: str
     model_type: str
+    requested_model: str = Field(..., description="Model identifier requested by caller")
+    actual_model: str = Field(..., description="Actual model identifier used for inference")
+    fallback_used: bool = Field(default=False, description="True if a fallback model was used instead of requested_model")
     is_vulnerable: bool
     prediction: int = Field(..., description="0 = Safe, 1 = Vulnerable")
     confidence: float = Field(..., description="Probability of predicted class (0.0 to 1.0)")
@@ -67,6 +74,10 @@ class BatchScanRequest(BaseModel):
 
     items: List[BatchScanItem] = Field(..., min_length=1, max_length=100)
     model_id: str = Field(default="tfidf_logistic_regression")
+    allow_fallback: bool = Field(
+        default=False,
+        description="Whether to permit transparent fallback to a classical baseline if the requested model is unavailable.",
+    )
 
 
 class BatchScanResponse(BaseModel):
