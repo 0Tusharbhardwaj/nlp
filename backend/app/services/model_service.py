@@ -45,13 +45,30 @@ class ModelManager:
 
         # 1. TF-IDF + Logistic Regression
         lr_candidates = [
+            self.models_dir / "logistic_regression_full.joblib",
             self.models_dir / "logistic_regression_devign.joblib",
             self.models_dir / "tfidf_logistic_regression.joblib",
         ]
         lr_path = next((p for p in lr_candidates if p.exists()), None)
         if lr_path:
             try:
-                self.loaded_models["tfidf_logistic_regression"] = TFIDFLogisticRegression.load(lr_path)
+                import joblib
+                from sklearn.linear_model import LogisticRegression
+                loaded = joblib.load(lr_path)
+                if isinstance(loaded, TFIDFLogisticRegression):
+                    self.loaded_models["tfidf_logistic_regression"] = loaded
+                elif isinstance(loaded, LogisticRegression):
+                    wrapped = TFIDFLogisticRegression()
+                    wrapped.classifier = loaded
+                    for v_name in ["tfidf_vectorizer_full.joblib", "tfidf_vectorizer_devign.joblib", "tfidf_vectorizer.joblib"]:
+                        v_p = self.models_dir / v_name
+                        if v_p.exists():
+                            wrapped.vectorizer = joblib.load(v_p)
+                            wrapped.is_fitted = True
+                            break
+                    self.loaded_models["tfidf_logistic_regression"] = wrapped
+                else:
+                    self.loaded_models["tfidf_logistic_regression"] = loaded
                 status_lr = "ready"
             except Exception as e:
                 status_lr = f"load_failed: {str(e)}"
@@ -76,13 +93,30 @@ class ModelManager:
 
         # 2. TF-IDF + Linear SVM
         svm_candidates = [
+            self.models_dir / "linear_svm_full.joblib",
             self.models_dir / "linear_svm_devign.joblib",
             self.models_dir / "tfidf_linear_svm.joblib",
         ]
         svm_path = next((p for p in svm_candidates if p.exists()), None)
         if svm_path:
             try:
-                self.loaded_models["tfidf_linear_svm"] = TFIDFLinearSVM.load(svm_path)
+                import joblib
+                from sklearn.svm import LinearSVC
+                loaded = joblib.load(svm_path)
+                if isinstance(loaded, TFIDFLinearSVM):
+                    self.loaded_models["tfidf_linear_svm"] = loaded
+                elif isinstance(loaded, LinearSVC) or hasattr(loaded, "decision_function"):
+                    wrapped = TFIDFLinearSVM()
+                    wrapped.classifier = loaded
+                    for v_name in ["tfidf_vectorizer_full.joblib", "tfidf_vectorizer_devign.joblib", "tfidf_vectorizer.joblib"]:
+                        v_p = self.models_dir / v_name
+                        if v_p.exists():
+                            wrapped.vectorizer = joblib.load(v_p)
+                            wrapped.is_fitted = True
+                            break
+                    self.loaded_models["tfidf_linear_svm"] = wrapped
+                else:
+                    self.loaded_models["tfidf_linear_svm"] = loaded
                 status_svm = "ready"
             except Exception as e:
                 status_svm = f"load_failed: {str(e)}"
