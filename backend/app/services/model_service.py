@@ -43,6 +43,27 @@ class ModelManager:
         if self._is_initialized:
             return
 
+        # Load empirical evaluation metrics if present
+        baseline_metrics = {}
+        bm_file = Path("results/metrics/full_scale_baselines_metrics.json")
+        if bm_file.exists():
+            try:
+                import json
+                with open(bm_file, "r", encoding="utf-8") as f:
+                    baseline_metrics = json.load(f).get("results", {})
+            except Exception:
+                pass
+
+        cb_metrics = {}
+        cm_file = Path("results/metrics/cross_dataset_full_scale_results.json")
+        if cm_file.exists():
+            try:
+                import json
+                with open(cm_file, "r", encoding="utf-8") as f:
+                    cb_metrics = json.load(f).get("e1_devign_test", {})
+            except Exception:
+                pass
+
         # 1. TF-IDF + Logistic Regression
         lr_candidates = [
             self.models_dir / "logistic_regression_full.joblib",
@@ -75,6 +96,7 @@ class ModelManager:
         else:
             status_lr = "checkpoint_missing"
 
+        lr_metrics = baseline_metrics.get("logistic_regression", {})
         self.model_metadata["tfidf_logistic_regression"] = {
             "id": "tfidf_logistic_regression",
             "name": "TF-IDF + Logistic Regression",
@@ -82,12 +104,13 @@ class ModelManager:
             "description": "N-gram lexical TF-IDF feature extractor paired with balanced Logistic Regression classifier.",
             "status": status_lr,
             "version": "1.0.0",
-            "training_dataset": "Devign (Human-written C/C++)",
+            "training_dataset": "Devign (Official 21,854 Training Functions)",
             "metrics_summary": {
-                "test_accuracy": 0.50,
-                "test_f1": 0.667,
-                "test_recall": 1.00,
-                "false_negative_rate": 0.00,
+                "test_accuracy": round(lr_metrics.get("accuracy", 0.6135), 4),
+                "test_f1": round(lr_metrics.get("macro_f1", 0.6130), 4),
+                "test_recall": round(lr_metrics.get("recall", 0.6279), 4),
+                "false_negative_rate": round(lr_metrics.get("false_negative_rate", 0.3721), 4),
+                "roc_auc": round(lr_metrics.get("roc_auc", 0.6734), 4),
             },
         }
 
@@ -121,6 +144,7 @@ class ModelManager:
         else:
             status_svm = "checkpoint_missing"
 
+        svm_metrics = baseline_metrics.get("linear_svm", {})
         self.model_metadata["tfidf_linear_svm"] = {
             "id": "tfidf_linear_svm",
             "name": "TF-IDF + Linear SVM",
@@ -128,12 +152,13 @@ class ModelManager:
             "description": "N-gram lexical TF-IDF feature extractor with balanced Linear Support Vector Machine (LinearSVC) and Platt scaling.",
             "status": status_svm,
             "version": "1.0.0",
-            "training_dataset": "Devign (Human-written C/C++)",
+            "training_dataset": "Devign (Official 21,854 Training Functions)",
             "metrics_summary": {
-                "test_accuracy": 0.50,
-                "test_f1": 0.667,
-                "test_recall": 1.00,
-                "false_negative_rate": 0.00,
+                "test_accuracy": round(svm_metrics.get("accuracy", 0.5944), 4),
+                "test_f1": round(svm_metrics.get("macro_f1", 0.5848), 4),
+                "test_recall": round(svm_metrics.get("recall", 0.4813), 4),
+                "false_negative_rate": round(svm_metrics.get("false_negative_rate", 0.5187), 4),
+                "roc_auc": round(svm_metrics.get("roc_auc", 0.6634), 4),
             },
         }
 
@@ -194,11 +219,14 @@ class ModelManager:
             "description": "Pre-trained bimodal RoBERTa contextual transformer fine-tuned with binary classification head on source code tokens.",
             "status": status_codebert,
             "version": "1.0.0",
-            "training_dataset": "Devign (Human-written C/C++) / LLMVul",
+            "training_dataset": "Devign (Official 21,854 Training Functions)",
             "metrics_summary": {
                 "checkpoint": str(self.codebert_checkpoint_path) if self.codebert_checkpoint_path else "missing",
-                "test_accuracy": 0.50,
-                "test_f1": 0.667,
+                "test_accuracy": round(cb_metrics.get("accuracy", 0.6636), 4),
+                "test_f1": round(cb_metrics.get("macro_f1", 0.6471), 4),
+                "test_recall": round(cb_metrics.get("recall", 0.4869), 4),
+                "false_negative_rate": round(cb_metrics.get("fnr", 0.5131), 4),
+                "roc_auc": round(cb_metrics.get("roc_auc", 0.7301), 4),
             },
         }
 
