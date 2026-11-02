@@ -136,3 +136,4 @@
 - Point to the submission package [`docs/paper/overleaf_package.zip`](file:///c:/Users/tusha/OneDrive/Desktop/sem%205/nlp/docs/paper/overleaf_package.zip).
 - Point to [`launch_jupyter_gpu.bat`](file:///c:/Users/tusha/OneDrive/Desktop/sem%205/nlp/launch_jupyter_gpu.bat) and mention:
   *"Everything was reproduced, audited, and executed locally on our NVIDIA RTX 3050 GPU under an Anaconda environment with 44 passing unit tests."*
+
