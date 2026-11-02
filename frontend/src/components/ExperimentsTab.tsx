@@ -119,18 +119,13 @@ export const ExperimentsTab: React.FC = () => {
               Comparative metrics across Human In-Distribution, Zero-Shot AI Transfer, and Joint Adaptation.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="w-3 h-3 rounded-sm bg-sky-500 inline-block" /> Accuracy
-            <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block ml-2" /> Recall
-            <span className="w-3 h-3 rounded-sm bg-rose-500 inline-block ml-2" /> FNR (Missed Bugs)
-          </div>
         </div>
 
-        <div className="h-80 w-full">
+        <div className="h-96 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 25 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} angle={-15} textAnchor="end" />
+              <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} angle={-15} textAnchor="end" height={60} interval={0} />
               <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} unit="%" />
               <Tooltip
                 contentStyle={{
@@ -141,7 +136,7 @@ export const ExperimentsTab: React.FC = () => {
                   color: '#f8fafc',
                 }}
               />
-              <Legend wrapperStyle={{ paddingTop: '10px' }} />
+              <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '16px', fontSize: '12px' }} />
               <Bar dataKey="accuracy" name="Accuracy (%)" fill="#38bdf8" radius={[4, 4, 0, 0]} />
               <Bar dataKey="recall" name="Recall (%)" fill="#10b981" radius={[4, 4, 0, 0]} />
               <Bar dataKey="f1_score" name="F1 Score (%)" fill="#818cf8" radius={[4, 4, 0, 0]} />

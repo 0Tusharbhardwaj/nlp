@@ -225,7 +225,7 @@ export const ScannerTab: React.FC<ScannerTabProps> = ({ models, defaultModelId }
                   <select
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
-                    className="bg-slate-800 text-xs text-slate-200 pl-3 pr-8 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 appearance-none font-medium cursor-pointer"
+                    className="bg-slate-800 text-xs text-slate-200 pl-3 pr-8 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 appearance-none font-medium cursor-pointer max-w-[260px] sm:max-w-[300px] truncate"
                   >
                     {models.map((m) => (
                       <option key={m.id} value={m.id} disabled={m.status !== 'ready'}>
@@ -277,8 +277,8 @@ export const ScannerTab: React.FC<ScannerTabProps> = ({ models, defaultModelId }
             </div>
 
             {/* Editor Action Bar */}
-            <div className="bg-slate-900/90 px-4 py-3 border-t border-slate-800 flex items-center justify-between">
-              <span className="text-xs text-slate-400">
+            <div className="bg-slate-900/90 px-4 py-3 border-t border-slate-800 flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-400 truncate max-w-[280px] sm:max-w-[340px]">
                 Active Model:{' '}
                 <strong className="text-slate-200">
                   {currentModelMeta?.name || selectedModel}
@@ -323,7 +323,7 @@ export const ScannerTab: React.FC<ScannerTabProps> = ({ models, defaultModelId }
           )}
 
           {scanResult ? (
-            <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-5 animate-in fade-in duration-300">
+            <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-5 animate-in fade-in duration-300 min-h-[580px] flex flex-col justify-between">
               {/* Transparent Fallback Notice if active */}
               {scanResult.fallback_used && (
                 <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">

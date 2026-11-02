@@ -66,16 +66,18 @@ graph TB
 
 ```text
 SecureCode-AI/
-├── datasets/                       # Dataset storage (excluded from git)
-│   ├── raw/                        # Original, unmodified benchmark downloads
-│   ├── processed/                  # Normalized, deduplicated, tokenized splits
-│   ├── external/                   # Supplementary evaluation sets (e.g. LLMVul)
+├── datasets/                       # Dataset storage (raw, processed, external, reports)
+│   ├── raw/                        # Original benchmark archives
+│   ├── processed/                  # Normalized, deduplicated, split data (Devign, LLMVul, SeCodePLT)
+│   ├── external/                   # Supplementary evaluation sets (e.g. LLMVul, SeCodePLT)
 │   └── reports/                    # Dataset profile reports & schema audits
 ├── notebooks/                      # Colab-ready Jupyter notebooks for training
-│   └── 01_codebert_finetuning.ipynb
+│   ├── 02_full_scale_baselines.ipynb       # TF-IDF + Logistic Reg / Linear SVM on 27,318 samples
+│   ├── 03_codebert_full_scale_training.ipynb # 3-epoch CodeBERT fine-tuning pipeline with checkpoints
+│   └── 04_cross_dataset_evaluation.ipynb   # Cross-dataset benchmark matrix generation (E1–E4)
 ├── src/                            # Core Machine Learning source package
-│   ├── data/                       # Ingestion scripts & schema harmonizers
-│   ├── preprocessing/              # Tokenization, safe comment handling, dedup
+│   ├── data/                       # Ingestion scripts, schema harmonizers & 0%-leakage partitioner
+│   ├── preprocessing/              # 5-state lexer, token length audit, dedup
 │   ├── models/                     # PyTorch CodeBERT & Scikit-learn baselines
 │   ├── training/                   # Trainer loop, loss functions, checkpointing
 │   ├── evaluation/                 # Metrics calculator, FNR, confusion matrices
@@ -92,16 +94,20 @@ SecureCode-AI/
 ├── configs/                        # YAML configuration files
 │   └── base.yaml                   # Central project & hyperparameter config
 ├── scripts/                        # Reproducible CLI scripts for training/eval
-├── tests/                          # Pytest suite for ML, API, and integrity
-├── results/                        # Outputs (excluded from git except .gitkeep)
+├── tests/                          # 44 automated unit & integration tests
+├── results/                        # Outputs
 │   ├── checkpoints/                # PyTorch epoch checkpoints
-│   ├── models/                     # Saved models & vectorizers
+│   ├── models/                     # Production models & CodeBERT weights
 │   ├── metrics/                    # JSON/CSV evaluation metrics
 │   ├── figures/                    # Saved confusion matrices & ROC curves
 │   └── logs/                       # Application & training log outputs
 ├── docs/                           # Research & architecture documentation
+│   ├── RESEARCH_PAPER.md           # Full scientific paper draft
+│   ├── FINAL_RESEARCH_PAPER_PLAN.md # Deliverables & milestone plan
 │   ├── PROJECT_ARCHITECTURE.md     # System design & component contracts
-│   └── EXPERIMENT_PLAN.md          # Controlled scientific experiment plan
+│   └── paper/                      # Submission-ready Overleaf / IEEEtran LaTeX template
+│       ├── main.tex                # Formatted IEEE paper draft
+│       └── references.bib          # BibTeX citations
 ├── .env.example                    # Template environment variables
 ├── .gitignore                      # Git exclusion rules
 ├── requirements.txt                # Python 3.11 dependency manifest

@@ -214,7 +214,7 @@ class ModelManager:
 
         self.model_metadata["codebert"] = {
             "id": "codebert",
-            "name": f"Microsoft CodeBERT (Fine-Tuned){ckpt_size_mb}",
+            "name": "Microsoft CodeBERT (Fine-Tuned)",
             "type": "transformer",
             "description": "Pre-trained bimodal RoBERTa contextual transformer fine-tuned with binary classification head on source code tokens.",
             "status": status_codebert,

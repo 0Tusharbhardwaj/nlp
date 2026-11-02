@@ -1,0 +1,46 @@
+{
+  "dataset": "CodeXGLUE / Devign (Official 27,318 samples)",
+  "train_samples": 21854,
+  "val_samples": 2732,
+  "test_samples": 2732,
+  "results": {
+    "logistic_regression": {
+      "accuracy": 0.6134699853587116,
+      "precision": 0.5722585330428468,
+      "recall": 0.6278884462151394,
+      "macro_f1": 0.6129514192983361,
+      "binary_f1": 0.5987841945288754,
+      "false_negative_rate": 0.37211155378486055,
+      "roc_auc": 0.6733766356375446,
+      "confusion_matrix": [
+        [
+          888,
+          589
+        ],
+        [
+          467,
+          788
+        ]
+      ]
+    },
+    "linear_svm": {
+      "accuracy": 0.5944363103953147,
+      "precision": 0.5692742695570217,
+      "recall": 0.48127490039840637,
+      "macro_f1": 0.5848097210060723,
+      "binary_f1": 0.5215889464594128,
+      "false_negative_rate": 0.5187250996015936,
+      "roc_auc": 0.6634264566648774,
+      "confusion_matrix": [
+        [
+          1020,
+          457
+        ],
+        [
+          651,
+          604
+        ]
+      ]
+    }
+  }
+}

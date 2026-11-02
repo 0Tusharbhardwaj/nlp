@@ -51,12 +51,19 @@ class CodeBERTClassifier:
         """Load tokenizer and pretrained weights if transformers is installed."""
         try:
             from transformers import AutoModelForSequenceClassification, AutoTokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, use_fast=True)
+            is_local = Path(self.model_name_or_path).exists()
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.model_name_or_path,
+                local_files_only=is_local,
+                use_fast=True,
+            )
             self.model = AutoModelForSequenceClassification.from_pretrained(
                 self.model_name_or_path,
                 num_labels=self.num_labels,
+                local_files_only=is_local,
             )
             self.model.to(self.device)
+            self.model.eval()
         except Exception as e:
             # Fallback for environments without downloaded weights or without transformers
             self.tokenizer = None

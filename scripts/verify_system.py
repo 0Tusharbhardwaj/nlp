@@ -32,14 +32,16 @@ def run_system_audit() -> bool:
     # 1. Artifact & Model Checkpoint Audit
     print("\n[1/6] Checking Model Checkpoints and Serialized Weights...")
     models_dir = Path("results/models")
-    lr_model = models_dir / "tfidf_logistic_regression.joblib"
-    svm_model = models_dir / "tfidf_linear_svm.joblib"
+    lr_model = models_dir / "logistic_regression_full.joblib"
+    svm_model = models_dir / "linear_svm_full.joblib"
+    cb_dir = models_dir / "codebert_devign_full"
 
-    if lr_model.exists() and svm_model.exists():
+    if lr_model.exists() and svm_model.exists() and cb_dir.exists():
         print(f"  [PASS] Logistic Regression Model: {lr_model} ({lr_model.stat().st_size} bytes)")
         print(f"  [PASS] Linear SVM Model:          {svm_model} ({svm_model.stat().st_size} bytes)")
+        print(f"  [PASS] CodeBERT Model Directory:  {cb_dir}")
     else:
-        print("  [FAIL] Missing model weights in results/models/")
+        print("  [FAIL] Missing full-scale model weights in results/models/")
         all_passed = False
 
     # 2. Processed Benchmark Datasets Audit

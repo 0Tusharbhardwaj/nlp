@@ -28,7 +28,7 @@ def main():
 
     if results.get("status") == "skipped":
         print(f"\n[NOTICE] Training skipped: {results.get('reason')}")
-        print("Note: CodeBERT requires PyTorch and Transformers with GPU acceleration. Use notebooks/01_codebert_finetuning.ipynb on Google Colab.")
+        print("Note: CodeBERT requires PyTorch and Transformers with GPU acceleration. Use notebooks/03_codebert_full_scale_training.ipynb on Google Colab.")
     else:
         m = results.get("test_metrics", {})
         print("\n--- CodeBERT Test Evaluation Summary ---")

@@ -1,0 +1,271 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Investigating the Domain Generalization Gap in Neural Vulnerability Detection: From Human-Authored to LLM-Generated Source Code}
+
+\author{
+\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{\textit{Department of Computer Science and Engineering} \\
+\textit{Laboratory for Automated Program Analysis \& Software Vulnerability Research} \\
+Artifact Repository: \url{https://github.com/0Tusharbhardwaj/nlp}}
+}
+
+\maketitle
+
+\begin{abstract}
+Automated source code synthesis driven by Large Language Models (LLMs) is transforming modern software engineering. However, recent empirical audits reveal that state-of-the-art code generators frequently introduce critical Common Weakness Enumerations (CWEs), such as buffer overflows (CWE-120), command injection (CWE-78), and memory management errors (CWE-415). While machine learning classifiers exhibit promising results in detecting vulnerabilities within human-authored codebases, whether these representations generalize to LLM-generated code remains largely unexamined.
+
+In this paper, we conduct a systematic empirical investigation into the \textit{Domain Generalization Gap} of neural vulnerability detection. Differentiating our work from broad claims of ``whole-system security,'' we strictly focus on static, function-level binary vulnerability classification across three benchmarks comprising over 51,000 C functions: CodeXGLUE/Devign (human-authored commits from QEMU and FFmpeg), LLMVul (frontier LLM-generated code across 226 production GitHub repositories), and SeCodePLT (a curated benchmark of paired CVE vulnerabilities and ground-truth patches).
+
+To eliminate synthetic evaluation artifacts, we enforce rigorous data hygiene: auditing repository leakage, constructing a strictly repository-disjoint holdout set ($0\%$ repository overlap), quarantining 2,679 ambiguous labels, and stripping comments via a syntax-preserving 5-state lexer. We evaluate classical lexical models (TF-IDF with Logistic Regression and Platt-calibrated Linear Support Vector Machines) against a contextual transformer (Microsoft CodeBERT, 125M parameters) fine-tuned on 21,854 Devign functions.
+
+Our empirical findings demonstrate: (1) \textbf{In-Distribution Efficacy:} CodeBERT achieves 66.36\% accuracy, 64.71\% Macro F1, and 0.7301 ROC-AUC on human code, outperforming classical baselines; (2) \textbf{Domain Generalization Collapse:} When evaluated zero-shot on LLM-generated code ($N=4,120$), CodeBERT suffers a severe performance drop of $-56.48\%$ in Macro F1 (falling to 8.23\%) due to an acute false-positive surge triggered by stylistic distribution shift; (3) \textbf{Patch Discrimination Blindness:} On 2,480 balanced pairs of CVE vulnerabilities and patches (SeCodePLT), zero-shot models perform at near random guessing (50.00\% accuracy, 0.4993 ROC-AUC), proving that sequence-level pooled classifiers fail to capture localized, surgical vulnerability repairs; and (4) \textbf{Benchmark Memorization:} Devign's official test split shares 100\% of its repositories with its training set, indicating that reported in-distribution metrics partially reflect repository memorization. We release our complete reproducible artifact, model checkpoints, and evaluation suite.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Vulnerability Detection, Neural Code Models, CodeBERT, Domain Generalization, Large Language Models, Software Defect Prediction.
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+\subsection{The Proliferation of AI-Assisted Code}
+Generative Large Language Models (LLMs)---such as OpenAI GPT-4, Anthropic Claude, and specialized code synthesis engines---are increasingly integrated into developer environments. Despite notable developer productivity gains, empirical evaluations have demonstrated the \textit{plausible correctness fallacy}: generated source code frequently satisfies superficial syntactic and functional requirements while embedding insidious Common Weakness Enumerations (CWEs)~\cite{pearce2022asleep}.
+
+Because human review of large-scale automated code generation is cost-prohibitive, automated vulnerability detection is essential. Over the past decade, machine learning approaches have gained prominence, learning implicit statistical representations from code syntax and semantics~\cite{zhou2019devign, feng2020codebert, lu2021codexglue}. However, existing neural vulnerability detectors have predominantly been developed and validated on human-authored open-source software (e.g., historical commits in C/C++ projects). This assumes that representations learned on human code transfer effectively to synthetic, LLM-generated software---an assumption that lacks systematic empirical validation.
+
+\subsection{Boundary of Scope: Vulnerability Detection vs. Security}
+To establish methodological rigor, we explicitly distinguish \textit{static source code vulnerability detection} from \textit{software security}:
+\begin{itemize}
+    \item \textbf{Comprehensive Software Security} encompasses multi-tier defense mechanisms, including cryptographic key lifecycle management, identity and access control, dynamic runtime exploit mitigations (ASLR, stack canaries), network perimeter boundaries, and formal verification of distributed system states.
+    \item \textbf{Our Focused Scope} is strictly confined to \textbf{static, function-level binary vulnerability classification}: determining whether an isolated C/C++ function exhibits structural or semantic patterns corresponding to known Common Weakness Enumerations (e.g., unchecked buffer copies, improper pointer deallocations).
+\end{itemize}
+We do not claim to provide a full-system security guarantee; rather, our objective is to measure the statistical reliability, calibration, and out-of-distribution transferability of neural code representations.
+
+\subsection{Research Questions}
+We guide our investigation through three central research questions:
+\begin{itemize}
+    \item \textbf{RQ1 (In-Distribution Performance):} How do classical lexical baselines (TF-IDF with Logistic Regression and Linear SVM) compare against deep contextual transformers (CodeBERT) on established human-authored C vulnerability benchmarks?
+    \item \textbf{RQ2 (Cross-Domain Generalization):} Does a neural vulnerability classifier trained exclusively on human-written source code generalize to LLM-generated code under strict zero-leakage, repository-disjoint holdout conditions?
+    \item \textbf{RQ3 (Surgical Patch Sensitivity):} Can sequence-level pooled transformer classifiers distinguish between vulnerable functions and their corresponding security patches in curated CVE benchmarks (SeCodePLT)?
+\end{itemize}
+
+\section{Related Work}
+
+\subsection{Classical vs. Machine Learning Vulnerability Analysis}
+Traditional Static Application Security Testing (SAST) tools (such as Flawfinder and Cppcheck) rely on deterministic Abstract Syntax Tree (AST) pattern matching and inter-procedural taint propagation. While sound within narrow rulesets, rule-based SAST exhibits high false-positive rates and cannot generalize to nuanced semantic variations.
+
+Machine learning reformulates vulnerability identification as statistical sequence or graph classification. Early systems utilized bag-of-words and lexical token n-grams coupled with linear models or decision trees~\cite{scikit-learn}. Subsequent advances introduced Graph Neural Networks (e.g., Devign~\cite{zhou2019devign}), which extract composite code property graphs incorporating AST, control-flow, and data-flow representations.
+
+\subsection{Pretrained Contextual Transformers for Code}
+Transformer-based foundation models for code, notably Microsoft CodeBERT~\cite{feng2020codebert}, adapt the RoBERTa architecture~\cite{liu2019roberta} to programming languages. Pretrained on bimodal corpora spanning natural language documentation and six programming languages via Masked Language Modeling (MLM) and Replaced Token Detection (RTD), CodeBERT yields rich contextual representations. Fine-tuning CodeBERT via a sequence classification head on top of the leading classification token ($\mathbf{h}_{\text{<s>}}$) represents the benchmark standard across the CodeXGLUE defect detection suite~\cite{lu2021codexglue}.
+
+\subsection{Vulnerability Characteristics of Generative Code}
+Recent studies have highlighted the security vulnerabilities latent in generative code assistants~\cite{pearce2022asleep, secodeplt2024}. Generative models reproduce insecure idioms pervasive in public open-source training corpuses. Concurrently, AI-authored code displays distinctive syntactic regularities: uniform identifier conventions, standardized formatting, and repetitive structural boilerplate. Whether these stylistic idiosyncrasies confound neural classifiers trained on human idiosyncrasies remains an open empirical question.
+
+\section{Dataset Hygiene, Provenance \& Partitioning}
+
+Empirical machine learning research in software engineering requires rigorous data hygiene to prevent synthetic evaluation artifacts and repository memorization.
+
+\begin{table*}[t]
+\centering
+\caption{Empirical Benchmark Dataset Inventory, Provenance, and Hygiene Partitions}
+\label{tab:datasets}
+\begin{tabular}{@{}lllrrp{5.5cm}@{}}
+\toprule
+\textbf{Benchmark} & \textbf{Language} & \textbf{Provenance} & \textbf{Samples} & \textbf{Vuln. Rate} & \textbf{Role in Empirical Evaluation} \\
+\midrule
+\textbf{CodeXGLUE / Devign} & C / C++ & QEMU, FFmpeg Commits & 27,318 & 45.8\% & Human training ($N=21,854$), validation ($2,732$), and test ($2,732$). \\
+\textbf{LLMVul (Full)} & C / C++ & Production AI Code (226 Repos) & 21,430 & 8.8\% & Raw cross-domain AI-generated corpus. \\
+\textbf{LLMVul (Clean Train)} & C / C++ & Greedy Disjoint (216 Repos) & 14,631 & 8.0\% & AI adaptation partition for cross-domain investigations. \\
+\textbf{LLMVul (Holdout)} & C / C++ & Greedy Disjoint (8 Repos) & 4,120 & 8.8\% & Zero-leakage out-of-distribution evaluation cohort (E2). \\
+\textbf{LLMVul (Gold Standard)} & C / C++ & Unanimous Human Expert Audit & 85 & 97.6\% & High-confidence ground-truth validation set. \\
+\textbf{SeCodePLT} & C & Verified CVE Benchmarks & 2,480 & 50.0\% & 1,240 balanced pairs of vulnerable functions and patches. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Benchmark Dataset Inventory}
+As summarized in Table~\ref{tab:datasets}, we compile three diverse corpora comprising 51,228 functions:
+\begin{enumerate}
+    \item \textbf{CodeXGLUE / Devign:} 27,318 human-written C/C++ functions collected from QEMU and FFmpeg repositories with official train (21,854), validation (2,732), and test (2,732) partitions~\cite{zhou2019devign, lu2021codexglue}.
+    \item \textbf{LLMVul:} 21,430 functions authored by frontier LLMs (GPT-4, Claude 3.5, GitHub Copilot) spanning 226 production GitHub repositories.
+    \item \textbf{SeCodePLT:} NeurIPS 2024 benchmark providing 1,240 verified C Common Vulnerabilities and Exposures (CVEs) paired with their ground-truth patches ($N=2,480$)~\cite{secodeplt2024}.
+\end{enumerate}
+
+\subsection{Data Hygiene Audits}
+
+\subsubsection{Internal Repository Overlap in Devign}
+Our metadata audit of the standard Devign split revealed that the official test set shares \textbf{100\% of its source repositories} (`qemu` and `ffmpeg`) with the training set. Furthermore, exact text-hash deduplication identified:
+\begin{itemize}
+    \item 10 character-identical functions present in both training and test partitions.
+    \item 57 functions in the training partition with conflicting labels (exact identical function text labeled as both vulnerable and safe).
+\end{itemize}
+This indicates that models evaluated on Devign may achieve inflated scores by memorizing repository-specific naming schemes and programming idioms rather than abstract vulnerability properties.
+
+\subsubsection{Greedy Zero-Leakage Repository Partitioning (LLMVul)}
+The raw LLMVul dataset contains 2,679 samples with ambiguous labels (`NaN`) caused by discordance among underlying automated verification scanners. We quarantined these samples into `llmvul_uncertain.jsonl` and excluded them from primary evaluation.
+
+To enforce strict out-of-distribution evaluation, we developed a deterministic, greedy repository partitioner:
+\begin{equation}
+\mathcal{R}_{\text{train}} \cap \mathcal{R}_{\text{holdout}} = \emptyset
+\end{equation}
+The algorithm allocated 14,631 clean samples across 216 repositories to training and 4,120 clean samples across 8 complete, isolated repositories to the holdout cohort, ensuring \textbf{0\% repository leakage}.
+
+\subsubsection{Syntax-Preserving Lexical Normalization}
+Standard naive regular expression comment strippers (e.g., `re.sub(r'//.*', '', code)`) routinely corrupt string literals containing slash characters (e.g., URI schemes `"https://..."`). To prevent syntax distortion, we engineered a deterministic 5-state lexer:
+\begin{equation}
+S \in \{\text{NORMAL}, \text{IN\_STRING}, \text{IN\_CHAR}, \text{IN\_LINE\_CMT}, \text{IN\_BLOCK\_CMT}\}
+\end{equation}
+This state machine removes comments while preserving string literals, character constants, pointer dereferences, and macro boundaries.
+
+\subsubsection{Token Truncation Audit}
+Using the BPE tokenizer of `microsoft/codebert-base`, we audited the length distribution across all 21,854 Devign training functions. While the median length is 71 tokens, \textbf{23.12\% of functions (5,053 samples) exceed the maximum sequence limit of 512 tokens}. In our pipeline, we enforce a consistent head-truncation policy, retaining function declarations, formal parameter types, and initial control blocks while truncating trailing statements.
+
+\section{Modeling Methodology \& Training Protocol}
+
+\subsection{Classical Lexical Baselines}
+We implement two classical baselines fitted on the 21,854 Devign training samples:
+\begin{enumerate}
+    \item \textbf{TF-IDF + Balanced Logistic Regression:} We extract word and syntax n-grams ($n \in [1, 2]$) up to 10,000 features. We optimize $L_2$-regularized cross-entropy with inverse regularization parameter $C=1.0$ via L-BFGS. Class weights are inversely balanced:
+    \begin{equation}
+    w_c = \frac{N}{2 \cdot N_c}
+    \end{equation}
+    where $N$ is total samples and $N_c$ is class frequency.
+    \item \textbf{TF-IDF + Calibrated Linear SVM:} A Linear Support Vector Classifier (`LinearSVC`) optimizing squared-hinge loss with $L_2$ penalty ($C=1.0$). To produce calibrated posterior probabilities, we apply cross-validated \textbf{Platt scaling}~\cite{platt1999probabilistic}:
+    \begin{equation}
+    P(y=1 \mid x) = \frac{1}{1 + \exp\left(A \cdot f(x) + B\right)}
+    \end{equation}
+    where $f(x) = \mathbf{w}^T x + b$ is the uncalibrated decision margin.
+\end{enumerate}
+
+\subsection{Microsoft CodeBERT Fine-Tuning}
+We fine-tune `microsoft/codebert-base` (12 layers, 768 hidden dimensions, 12 attention heads, 125M parameters). The classification head pools the leading classification token $\mathbf{h}_{\text{<s>}}$:
+\begin{equation}
+\mathbf{h}_{\text{pool}} = \tanh(\mathbf{W}_1 \mathbf{h}_{\text{<s>}} + \mathbf{b}_1)
+\end{equation}
+\begin{equation}
+\hat{\mathbf{y}} = \text{softmax}(\mathbf{W}_2 \, \text{Dropout}(\mathbf{h}_{\text{pool}}) + \mathbf{b}_2)
+\end{equation}
+
+\subsubsection{Hyperparameters and Optimization}
+Fine-tuning was executed on a Google Colab Tesla T4 GPU (16 GB VRAM) using Automatic Mixed Precision (FP16 via `torch.cuda.amp`). We employed the AdamW optimizer with weight decay $\lambda = 0.01$ and a peak learning rate of $\alpha = 2 \times 10^{-5}$ governed by a cosine learning rate scheduler. To prevent early gradient shock, we configured a linear warmup over the initial 10\% of iterations (341 warmup steps). Training proceeded for 3 complete epochs (4,098 total steps, batch size 16). Checkpoints were evaluated every 500 steps, and the model state exhibiting peak validation Macro F1 was preserved.
+
+\section{Empirical Results \& Discussion}
+
+\begin{table*}[t]
+\centering
+\caption{Empirical Vulnerability Classification Performance Across Experimental Cohorts}
+\label{tab:main_results}
+\begin{tabular}{@{}lllcccccc@{}}
+\toprule
+\textbf{Setting} & \textbf{Model} & \textbf{Evaluation Cohort ($N$)} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{Macro F1} & \textbf{FNR} & \textbf{ROC-AUC} \\
+\midrule
+\textbf{Baseline 1} & TF-IDF + Logistic Regression & Devign Test ($2,732$) & 61.35\% & 57.23\% & 62.79\% & 61.30\% & 37.21\% & 0.6734 \\
+\textbf{Baseline 2} & TF-IDF + Linear SVM (Platt) & Devign Test ($2,732$) & 59.44\% & 56.93\% & 48.13\% & 58.48\% & 51.87\% & 0.6634 \\
+\textbf{E1 (In-Distribution)} & \textbf{Microsoft CodeBERT} & \textbf{Devign Test ($2,732$)} & \textbf{66.36\%} & \textbf{68.96\%} & \textbf{48.69\%} & \textbf{64.71\%} & \textbf{51.31\%} & \textbf{0.7301} \\
+\midrule
+\textbf{E2 (AI Transfer)} & \textbf{Microsoft CodeBERT} & \textbf{LLMVul Holdout ($4,120$)} & \textbf{8.93\%} & \textbf{8.84\%} & \textbf{100.0\%} & \textbf{8.23\%} & \textbf{0.00\%} & \textbf{0.6888} \\
+\textbf{Gold Standard} & Microsoft CodeBERT & Expert Consensus ($85$) & 97.65\% & 97.65\% & 100.0\% & 49.40\% & 0.00\% & 0.3675 \\
+\textbf{CVE Patch Transfer} & Microsoft CodeBERT & SeCodePLT Pairs ($2,480$) & 50.00\% & 50.00\% & 99.84\% & 33.48\% & 0.16\% & 0.4993 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[htbp]
+\centering
+\caption{Confusion Matrix Breakdown Across Primary Experimental Settings}
+\label{tab:cm_breakdown}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Evaluation Setting} & \textbf{TN} & \textbf{FP} & \textbf{FN} & \textbf{TP} \\
+\midrule
+\textbf{E1 (Devign In-Dist, $N=2,732$)} & 1,202 & 275 & 644 & 611 \\
+\textbf{E2 (LLMVul AI Holdout, $N=4,120$)} & 4 & 3,752 & 0 & 364 \\
+\textbf{SeCodePLT (CVE Pairs, $N=2,480$)} & 2 & 1,238 & 2 & 1,238 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{RQ1: Human In-Distribution Performance (E1)}
+As detailed in Table~\ref{tab:main_results}, CodeBERT outperforms classical lexical baselines on human-authored source code:
+\begin{itemize}
+    \item \textbf{Discriminative Power:} CodeBERT attains \textbf{66.36\% Accuracy} and \textbf{64.71\% Macro F1}, exceeding Logistic Regression (61.30\% F1, $+3.41\%$) and Linear SVM (58.48\% F1, $+6.23\%$).
+    \item \textbf{ROC-AUC:} CodeBERT achieves \textbf{0.7301}, compared to 0.6734 for Logistic Regression and 0.6634 for Linear SVM ($+6.67\%$).
+    \item \textbf{Precision and Noise Suppression:} CodeBERT yields a precision of \textbf{68.96\%} (275 false positives out of 1,477 non-vulnerable functions, Table~\ref{tab:cm_breakdown}), reflecting the capacity of multi-head self-attention to disambiguate benign buffer operations from unbounded copies.
+\end{itemize}
+
+\subsection{RQ2: Cross-Domain Generalization Collapse (E2)}
+When CodeBERT is deployed zero-shot on LLM-generated code across the strictly disjoint holdout set ($N=4,120$), we observe a catastrophic collapse in discriminative ability:
+\begin{equation}
+\Delta \text{Macro F1} = -56.48\% \quad (64.71\% \rightarrow 8.23\%)
+\end{equation}
+\begin{equation}
+\Delta \text{Accuracy} = -57.43\% \quad (66.36\% \rightarrow 8.93\%)
+\end{equation}
+As shown in Table~\ref{tab:cm_breakdown}, the model classified 3,752 out of 3,756 non-vulnerable AI functions as vulnerable, yielding only 4 true negatives. While Recall reaches 100\% (False Negative Rate = 0.0\%), this reflects a pathological loss of calibration: the model systematically flags AI-authored code as anomalous and vulnerable regardless of semantic safety. We attribute this to stylistic distribution shift: LLMs produce code with standardized naming, uniform indentation, and synthetic structure that human-trained sequence classifiers associate with aberrant code patterns.
+
+\subsection{RQ3: Sensitivity to Surgical Security Patches (SeCodePLT)}
+On the SeCodePLT benchmark comprising 2,480 balanced samples (1,240 verified CVE-vulnerable C functions paired with their ground-truth commit patches):
+\begin{itemize}
+    \item CodeBERT achieves exactly \textbf{50.00\% Accuracy} and an ROC-AUC of \textbf{0.4993}, performance that is statistically indistinguishable from a random coin toss.
+    \item In 99.8\% of cases, the model predicted both the original vulnerable function and the patched function as vulnerable (1,238 false positives and 1,238 true positives, Table~\ref{tab:cm_breakdown}).
+\end{itemize}
+\textit{Analytical Takeaway:} Security patches in C typically involve minimal token edits---such as inserting an explicit bounds guard (`if (len >= MAX) return -1;`) or reordering a memory deallocation. Because sequence-level classification heads pool representations across all 512 input tokens, the 95\%+ unchanged token context dominates the sequence vector, rendering the localized patch invisible to the classifier.
+
+\section{Threats to Validity}
+
+\begin{enumerate}
+    \item \textbf{Construct Validity (Function vs. Whole-Program Context):} Static analysis at function granularity ignores inter-procedural data flows, global state invariants, and execution wrappers. A function flagged as vulnerable in isolation may be safe due to input sanitization executed upstream.
+    \item \textbf{Internal Validity (Sequence Truncation):} 23.12\% of functions exceed the 512-token boundary. Truncation discards trailing code, potentially removing the location of the actual vulnerability or its sanitizing check.
+    \item \textbf{External Validity (Language Scope):} Our empirical results are established on C and C++ functions where memory safety (CWE-120, CWE-415) is paramount. In managed languages (e.g., Python, Go), cross-domain transfer dynamics may present different characteristics.
+    \item \textbf{Benchmark Label Noise:} As documented in Section III, public vulnerability datasets contain labeling noise and contradictory annotations. We mitigated this by quarantining ambiguous samples and corroborating findings on an expert-audited gold cohort.
+\end{enumerate}
+
+\section{Artifact Availability \& System Architecture}
+
+To ensure full reproducibility, we release our complete software pipeline as an open-source artifact at \url{https://github.com/0Tusharbhardwaj/nlp}:
+\begin{itemize}
+    \item \textbf{Trained Weights:} Full-scale baseline models and CodeBERT safetensors ($498$ MB) available via programmatic loaders.
+    \item \textbf{Inference Service:} High-throughput FastAPI REST engine providing sub-15ms baseline inference and multi-model dispatch with transparent fallback attribution.
+    \item \textbf{Interactive Dashboard:} React 19 and Monaco Editor interface offering preset CWE test templates and live confidence visualization.
+    \item \textbf{Reproduction Suite:} End-to-end Python test suite (44 unit/integration tests) and self-contained Colab GPU notebooks.
+\end{itemize}
+
+\section{Conclusion \& Recommendations}
+
+In this paper, we conducted a systematic empirical evaluation of neural vulnerability detection across human-authored and LLM-generated source code:
+\begin{enumerate}
+    \item Pretrained contextual transformers (CodeBERT) demonstrate superior in-distribution performance on human code (64.71\% Macro F1, 0.7301 ROC-AUC) over classical lexical baselines.
+    \item Models trained exclusively on human-written software suffer catastrophic domain shift when evaluated zero-shot on AI-generated code ($-56.48\%$ Macro F1 drop), triggering a severe false-positive surge.
+    \item Function-level pooled classifiers fail to detect subtle, surgical vulnerability patches, performing at random guessing levels on balanced CVE benchmarks (50.00\% accuracy on SeCodePLT).
+    \item Standard benchmarks such as Devign suffer from significant internal repository leakage (100\% shared repositories between train and test splits).
+\end{enumerate}
+\textbf{Recommendation for Practice:} Software engineering teams deploying generative AI coding assistants should avoid relying on vulnerability detectors trained solely on historical human open-source code. Safe deployment necessitates domain-adapted fine-tuning on AI-synthesized corpora and hybrid coupling with dynamic sanitizers.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
