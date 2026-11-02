@@ -8,7 +8,6 @@ against AI-generated and AI-assisted C/C++ code (LLMVul).
 ### Experiment Maturity & Status Breakdown:
 | Category | Experiments | Scope & Description |
 | :--- | :--- | :--- |
-| **Completed Experiments (Full Scale)** | *None* | Awaiting full-scale multi-gigabyte dataset execution on GPU cluster / Google Colab. |
 | **Smoke Tests (Pipeline Verification)** | **E1, E2, E3** | Local pipeline validation on curated function cohorts ($N=2$ to $4$ test samples). Validates zero vectorizer leakage, comment stripping, and metric computation mechanics. |
 | **Incomplete Experiments** | **E4 (AI-Native)** | Skipped due to 1-sample class collapse ($N_{train}=1$, label=1; 0 safe samples). Requires multi-repository stratified cohort. |
 | **Experiments Awaiting Full Scale** | **E1–E4 (Full Benchmarks)** | Full-scale training on complete CodeXGLUE (27,318 functions) and LLMVul (226 repositories) on high-memory GPU runtimes. |
@@ -31,7 +30,7 @@ against AI-generated and AI-assisted C/C++ code (LLMVul).
 | **E2_ZeroShot_AI_Transfer** | Linear SVM | **Smoke Test** | 4 | 4 | 1.0000 | 1.0000 | 1.0000 | **1.0000** | **0.0000** | 1.0 |
 | **E3_Joint_Adaptation** | Logistic Regression | **Smoke Test** | 5 | 3 | 1.0000 | 1.0000 | 1.0000 | **1.0000** | **0.0000** | 1.0 |
 | **E3_Joint_Adaptation** | Linear SVM | **Smoke Test** | 5 | 3 | 1.0000 | 1.0000 | 1.0000 | **1.0000** | **0.0000** | 1.0 |
-| **E4_AI_Native** | *All Models* | **Incomplete / Awaiting Full Data** | 1 | 3 | — | — | — | — | — | *Skipped (insufficient class diversity)* |
+| **E4_AI_Native** | *All Models* | **Incomplete / Awaiting Full Data** | 1 | 3 | — | — | — | — | — | *Skipped (insufficient_class_diversity_in_ai_train)* |
 
 ---
 

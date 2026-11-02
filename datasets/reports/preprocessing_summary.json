@@ -8,20 +8,20 @@
     },
     "token_length_distribution": {
       "total_samples": 8,
-      "min_tokens": 44,
-      "max_tokens": 94,
-      "mean_tokens": 58.88,
-      "median_tokens": 55.5,
-      "p75_tokens": 59.75,
-      "p90_tokens": 73.7,
-      "p95_tokens": 83.85,
-      "p99_tokens": 91.97,
+      "min_tokens": 59,
+      "max_tokens": 139,
+      "mean_tokens": 83.5,
+      "median_tokens": 78.0,
+      "p75_tokens": 86.25,
+      "p90_tokens": 108.9,
+      "p95_tokens": 123.95,
+      "p99_tokens": 135.99,
       "truncation_analysis": {
         "exceeding_128": {
           "threshold": 128,
-          "exceeding_count": 0,
-          "exceeding_percentage": 0.0,
-          "retained_within_window_percentage": 100.0
+          "exceeding_count": 1,
+          "exceeding_percentage": 12.5,
+          "retained_within_window_percentage": 87.5
         },
         "exceeding_256": {
           "threshold": 256,
@@ -122,14 +122,14 @@
     },
     "token_length_distribution": {
       "total_samples": 4,
-      "min_tokens": 54,
-      "max_tokens": 61,
-      "mean_tokens": 58.75,
-      "median_tokens": 60.0,
-      "p75_tokens": 61.0,
-      "p90_tokens": 61.0,
-      "p95_tokens": 61.0,
-      "p99_tokens": 61.0,
+      "min_tokens": 84,
+      "max_tokens": 114,
+      "mean_tokens": 92.75,
+      "median_tokens": 86.5,
+      "p75_tokens": 94.5,
+      "p90_tokens": 106.2,
+      "p95_tokens": 110.1,
+      "p99_tokens": 113.22,
       "truncation_analysis": {
         "exceeding_128": {
           "threshold": 128,
@@ -164,9 +164,9 @@
     "repository_overlap_audit": {
       "repository_distribution": {
         "external": [
-          "open-assistant/web-handler",
           "ai-infra/socket-proxy",
-          "ai-assisted-iot/network-daemon"
+          "ai-assisted-iot/network-daemon",
+          "open-assistant/web-handler"
         ]
       },
       "cross_split_repository_overlap": {}
@@ -179,14 +179,14 @@
     },
     "token_length_distribution": {
       "total_samples": 4,
-      "min_tokens": 31,
-      "max_tokens": 54,
-      "mean_tokens": 44.5,
-      "median_tokens": 46.5,
-      "p75_tokens": 52.5,
-      "p90_tokens": 53.4,
-      "p95_tokens": 53.7,
-      "p99_tokens": 53.94,
+      "min_tokens": 56,
+      "max_tokens": 83,
+      "mean_tokens": 71.5,
+      "median_tokens": 73.5,
+      "p75_tokens": 78.5,
+      "p90_tokens": 81.2,
+      "p95_tokens": 82.1,
+      "p99_tokens": 82.82,
       "truncation_analysis": {
         "exceeding_128": {
           "threshold": 128,
@@ -221,8 +221,8 @@
     "repository_overlap_audit": {
       "repository_distribution": {
         "supplementary": [
-          "coreutils",
-          "django_example"
+          "django_example",
+          "coreutils"
         ]
       },
       "cross_split_repository_overlap": {}

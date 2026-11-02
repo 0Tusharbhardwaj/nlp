@@ -16,3 +16,4 @@ echo [SecureCode AI] Starting JupyterLab on local RTX 3050 GPU...
 cd /d "%~dp0"
 jupyter lab --notebook-dir="%~dp0"
 pause
+

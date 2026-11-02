@@ -5,14 +5,14 @@
   },
   "token_length_distribution": {
     "total_samples": 4,
-    "min_tokens": 31,
-    "max_tokens": 54,
-    "mean_tokens": 44.5,
-    "median_tokens": 46.5,
-    "p75_tokens": 52.5,
-    "p90_tokens": 53.4,
-    "p95_tokens": 53.7,
-    "p99_tokens": 53.94,
+    "min_tokens": 56,
+    "max_tokens": 83,
+    "mean_tokens": 71.5,
+    "median_tokens": 73.5,
+    "p75_tokens": 78.5,
+    "p90_tokens": 81.2,
+    "p95_tokens": 82.1,
+    "p99_tokens": 82.82,
     "truncation_analysis": {
       "exceeding_128": {
         "threshold": 128,
@@ -47,8 +47,8 @@
   "repository_overlap_audit": {
     "repository_distribution": {
       "supplementary": [
-        "coreutils",
-        "django_example"
+        "django_example",
+        "coreutils"
       ]
     },
     "cross_split_repository_overlap": {}

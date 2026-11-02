@@ -5,14 +5,14 @@
   },
   "token_length_distribution": {
     "total_samples": 4,
-    "min_tokens": 54,
-    "max_tokens": 61,
-    "mean_tokens": 58.75,
-    "median_tokens": 60.0,
-    "p75_tokens": 61.0,
-    "p90_tokens": 61.0,
-    "p95_tokens": 61.0,
-    "p99_tokens": 61.0,
+    "min_tokens": 84,
+    "max_tokens": 114,
+    "mean_tokens": 92.75,
+    "median_tokens": 86.5,
+    "p75_tokens": 94.5,
+    "p90_tokens": 106.2,
+    "p95_tokens": 110.1,
+    "p99_tokens": 113.22,
     "truncation_analysis": {
       "exceeding_128": {
         "threshold": 128,
@@ -47,9 +47,9 @@
   "repository_overlap_audit": {
     "repository_distribution": {
       "external": [
-        "open-assistant/web-handler",
         "ai-infra/socket-proxy",
-        "ai-assisted-iot/network-daemon"
+        "ai-assisted-iot/network-daemon",
+        "open-assistant/web-handler"
       ]
     },
     "cross_split_repository_overlap": {}

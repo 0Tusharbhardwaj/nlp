@@ -7,20 +7,20 @@
   },
   "token_length_distribution": {
     "total_samples": 8,
-    "min_tokens": 44,
-    "max_tokens": 94,
-    "mean_tokens": 58.88,
-    "median_tokens": 55.5,
-    "p75_tokens": 59.75,
-    "p90_tokens": 73.7,
-    "p95_tokens": 83.85,
-    "p99_tokens": 91.97,
+    "min_tokens": 59,
+    "max_tokens": 139,
+    "mean_tokens": 83.5,
+    "median_tokens": 78.0,
+    "p75_tokens": 86.25,
+    "p90_tokens": 108.9,
+    "p95_tokens": 123.95,
+    "p99_tokens": 135.99,
     "truncation_analysis": {
       "exceeding_128": {
         "threshold": 128,
-        "exceeding_count": 0,
-        "exceeding_percentage": 0.0,
-        "retained_within_window_percentage": 100.0
+        "exceeding_count": 1,
+        "exceeding_percentage": 12.5,
+        "retained_within_window_percentage": 87.5
       },
       "exceeding_256": {
         "threshold": 256,
